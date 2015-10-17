@@ -8,8 +8,6 @@ require "config/routes.php";
  * @author Fernando Perez
 */
 class Config{
-
-
 	public static $db_host = "localhost";
 	public static $db_port = "3301";
 	public static $db_name = "diadb";
