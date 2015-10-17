@@ -2,7 +2,7 @@
 namespace Config;
 
 class Routes{
-    const USER_LOGIN = "/ws/login";
-    const USER_LOGOUT = "/ws/logout";
+    const USER_LOGIN = "/login";
+    const USER_LOGOUT = "/logout";
 }
 
