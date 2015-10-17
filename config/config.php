@@ -15,7 +15,7 @@ class Config{
 	public static $db_name = "diadb";
 	public static $db_prefTable = "";
 	public static $db_user = "dia_db_user";
-	public static $db_passwd = "dia_db_pass_2015";
+	public static $db_passwd = "diadb_pass_2015";
 	
 	public static $param_session_id = "SESSION_ID";
 
