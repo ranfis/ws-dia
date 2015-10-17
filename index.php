@@ -19,14 +19,14 @@ include "routes/routes.user.php";
 
 $app->notFound(function () use($param,$app) {
    $ws = new Core\Webservice(false);
-   if (!$ws->prepareRequest($ws,Webservice::METHOD_POST,array(),$app)) return;
+   if (!$ws->prepareRequest($ws,Core\Webservice::METHOD_POST,array(),$app)) return;
    $ws->generate_error(404,"Pagina no encontrada");
    echo $ws->output($app);
 });
 
 $app->error(function (\Exception $e) use($param,$app){
    $ws = new Core\Webservice(false);
-   if (!$ws->prepareRequest($ws,Webservice::METHOD_POST,array(),$app)) return;
+   if (!$ws->prepareRequest($ws,Core\Webservice::METHOD_POST,array(),$app)) return;
    $ws->generate_error(500,"Error interno del servidor");
    echo $ws->output($app);
 });
