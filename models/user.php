@@ -5,7 +5,7 @@ require_once("models/role.php");
 
 class User extends Model{
 	
-	const QUERY_FIND = "SELECT U.ID, U.CORREO, U.CLAVE, U.NOMBRE_COMPLETO, U.VER_CODIGO, U.FECHA_LOGIN, U.FECHA_CREACION,U.ROLE_ID,R.NOMBRE 'ROLE_NOMBRE' FROM usuario_aplicacion U INNER JOIN role R on U.ROLE_ID=r.ID";
+	const QUERY_FIND = "SELECT U.ID, U.CORREO, U.CLAVE, U.NOMBRE_COMPLETO, U.VER_CODIGO, U.FECHA_LOGIN, U.FECHA_CREACION,U.ROLE_ID,R.NOMBRE 'ROLE_NOMBRE' FROM usuario_aplicacion U INNER JOIN role R on U.ROLE_ID=R.ID";
 	
 	public $id;
 	public $correo;
