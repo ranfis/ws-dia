@@ -20,7 +20,7 @@ class User extends Model{
         $this->id = $id;
         $this->correo = $correo;
 	}
-	
+
 	/**
 	 * Method to get the user by id
 	 */
