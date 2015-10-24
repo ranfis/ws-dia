@@ -81,7 +81,7 @@ class Session extends Model{
 
         //update expiration date
         if ($session !== null){
-            $query = Session::formatQuery("UPDATE SESION SET FECHA_EXPIRACION= NOW() + INTERVAL " . self::SESSION_DATE_EXPIRE . " MINUTE WHERE SESION_ID=?");
+            $query = Session::formatQuery("UPDATE sesion SET FECHA_EXPIRACION= NOW() + INTERVAL " . self::SESSION_DATE_EXPIRE . " MINUTE WHERE SESION_ID=?");
             if (!$result = self::$dbManager->query($query)) return null;
             $result->bind_param("s",$sessionId);
             if (!self::$dbManager->executeSql($result)) return null;
