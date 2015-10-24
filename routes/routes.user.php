@@ -2,6 +2,18 @@
 require_once("models/user.php");
 require_once("models/session.php");
 
+$app->get(Config\Routes::USER_SUMMARY,function() use($app,$param){
+    $ws= new Core\Webservice();
+    $param = $_GET ? $_GET : $param;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+
+    $user = \Core\SessionManager::getSession()->user;
+    $result = $user->toJson();
+    $ws->result = $result;
+    echo $ws->output($app);
+});
+
+
 $app->post(Config\Routes::USER_LOGIN,function() use ($app,$param){
     $ws = new Core\Webservice();
     
@@ -20,10 +32,9 @@ $app->post(Config\Routes::USER_LOGIN,function() use ($app,$param){
 	 if ($user = Model\User::login($email,$pass)){
 		 //generate session
 		 $session = Model\Session::addSession($user);
-		 
-		 $result = [
-			"session_id"=> $session->id
-		 ];
+
+         $result = [];
+         $result['session_id'] = $session->id;
 		 
 		 $ws->result = $result;
 	 }else{

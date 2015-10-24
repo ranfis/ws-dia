@@ -132,11 +132,22 @@ class User extends Model{
 	/**
 	 * Method to mapping the user object to json
 	 */
-	private function mappingToJson(){
-			
+	public function toJson(){
+		$result = [];
+
+        /*public $id;
+        public $correo;
+        private $clave;
+        public $nombreCompleto;
+        public $verifCodigo;
+        public $fechaLogin;
+        public $fechaCreacion;*/
+
+        $result['email']  = $this->correo;
+        $result['nombre_completo']  = $this->nombreCompleto;
+
+        return $result;
 	}
-
-
 
 }
 

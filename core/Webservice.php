@@ -49,9 +49,34 @@ class Webservice{
 	 * Method to prepare the request before execute
      * TODO: finish
 	 */
-    public function prepareRequest(&$ws,$method = "GET",$paramRequest = null,$app = null){
-        
-        
+    public function prepareRequest($method = "GET",$paramRequest = null,$app = null){
+        $method = strtoupper($method);
+
+        if ($method != self::METHOD_GET && $paramRequest === null) {
+            $this->generate_error(3,"Invalid JSON Structure");
+            echo $this->output($app);
+            return false;
+        }
+
+        if (isset($paramRequest[self::PARAM_SESSIONID])) $this->param[self::PARAM_SESSIONID]  = $paramRequest[self::PARAM_SESSIONID];
+
+
+        if ($this->useSession){
+            $this->param[self::PARAM_SESSIONID] = isset($this->param[self::PARAM_SESSIONID]) ? $this->param[self::PARAM_SESSIONID] : null;
+
+            if (!SessionManager::isValidSession($this->param[self::PARAM_SESSIONID])){
+                $this->generate_error(5,"Invalid Session");
+                echo $this->output($app);
+                return false;
+            }
+
+            if (!SessionManager::hasSessionExpired($this->param[self::PARAM_SESSIONID])){
+                $this->generate_error(6,"Session has expired");
+                echo $this->output($app);
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
