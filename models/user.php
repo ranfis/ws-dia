@@ -1,12 +1,11 @@
 <?php
 namespace Model;
-
 require_once("models/model.php");
-
+require_once("models/role.php");
 
 class User extends Model{
 	
-	const QUERY_FIND = "SELECT U.ID, U.CORREO, U.CLAVE, U.NOMBRE_COMPLETO, U.VER_CODIGO, U.FECHA_LOGIN, U.FECHA_CREACION FROM {PREF_TABLE}usuario_aplicacion U";
+	const QUERY_FIND = "SELECT U.ID, U.CORREO, U.CLAVE, U.NOMBRE_COMPLETO, U.VER_CODIGO, U.FECHA_LOGIN, U.FECHA_CREACION,U.ROLE_ID,R.NOMBRE 'ROLE_NOMBRE' FROM usuario_aplicacion U INNER JOIN role R on U.ROLE_ID=r.ID";
 	
 	public $id;
 	public $correo;
@@ -15,10 +14,11 @@ class User extends Model{
 	public $verifCodigo;
 	public $fechaLogin;
 	public $fechaCreacion;
-	
-	
-	public function __construct(){
-		
+    private $role;
+
+	public function __construct($id= null,$correo = null){
+        $this->id = $id;
+        $this->correo = $correo;
 	}
 	
 	/**
@@ -77,16 +77,18 @@ class User extends Model{
 		if ($users === null || !$users) $users = array();
 			
 		//SELECT `ID`, `CORREO`, `CLAVE`, `NOMBRE_COMPLETO`, `VER_CODIGO`, `FECHA_LOGIN`, `FECHA_CREACION` FROM `usuario_aplicacion` WHERE 1
-		$result->bind_result($rId,$rCorreo,$rClave,$rNombreCompleto,$rVerCodigo,$rFechaLogin,$rFechaCreacion);
+		$bindResult = [];
+        $result->bind_result($bindResult['id'],$bindResult['correo'],$bindResult['clave'],$bindResult['nombre_completo'],$bindResult['codigo_verificacion'],$bindResult['fecha_login'],$bindResult['fecha_creacion'],$bindResult['role_id'],$bindResult['role_name']);
 		while($result->fetch()){
 			$user =  new User();
-			$user->id =$rId;
-			$user->correo = $rCorreo;
-			$user->clave = $rClave;
-			$user->nombreCompleto = $rNombreCompleto;
-			$user->verCodigo = $rVerCodigo;
-			$user->fechaLogin = $rFechaLogin;
-			$user->fechaCreacion = $rFechaCreacion;
+			$user->id =$bindResult['id'];
+			$user->correo = $bindResult['correo'];
+			$user->clave = $bindResult['clave'];
+			$user->nombreCompleto = $bindResult['nombre_completo'];
+			$user->verCodigo = $bindResult['codigo_verificacion'];
+			$user->fechaLogin = $bindResult['fecha_login'];
+			$user->fechaCreacion = $bindResult['fecha_creacion'];
+            $user->role = new Role($bindResult['role_id'],$bindResult['role_name']);
 			$users[] = $user;
 		}
 		
@@ -145,6 +147,10 @@ class User extends Model{
 
         $result['email']  = $this->correo;
         $result['nombre_completo']  = $this->nombreCompleto;
+        $result['role'] = [
+            "id"=> $this->role->getId(),
+            "name"=>$this->role->getName()
+        ];
 
         return $result;
 	}
