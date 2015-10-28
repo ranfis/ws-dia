@@ -15,6 +15,7 @@ $app->get('/',function () { echo ""; } );
 
 //include
 include "routes/routes.user.php";
+include "routes/routes.admin.php";
 
 $app->notFound(function () use($param,$app) {
    $ws = new Core\Webservice(false);

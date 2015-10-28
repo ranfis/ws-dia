@@ -23,12 +23,20 @@ class StringValidator{
 	}
 	
 	/**
-	 * Method to validate if the input is a date (MM-DD-YYYY)
+	 * Method to validate if the input is a date (YYYY-MM-DD)
 	 */
 	public static function isDate($input){
-		$pattern = "/^[0-9]{2}\-[0-9]{2}\-[0-9]{4}$/";
+		$pattern = "/^[0-9]{4}\-[0-1][0-9]\-[0-3][0-9]$/";
 		return preg_match($pattern,$input);
 	}
+
+    /**
+     * Method to validate if the input is a date (YYYY-MM-DD HH:mm:ss)
+     */
+    public static function isDateTime($input){
+        $pattern = "/^[0-9]{4}\-[0-1][0-9]\-[0-3][0-9]\:[0-9]{2}\:[0-9]{2}$/";
+        return preg_match($pattern,$input);
+    }
 	
 	/**
 	 * Method to verify if the input is a alphanumeric

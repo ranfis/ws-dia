@@ -1,5 +1,5 @@
 <?php
-require("DatabaseManager.php");
+require("core/database/DatabaseManager.php");
 require_once("core/CustomLogger.php");
 
 class MysqlManager extends DatabaseManager{
@@ -18,8 +18,8 @@ class MysqlManager extends DatabaseManager{
 		parent::$link = new mysqli($this->host,$this->username,$this->password,$this->dbName);
 		
 		if (parent::$link->connect_errno){
-			$logger = new CustomLogger();
-			$logger->error("Connect failed: " . $mysqli->connect_error . "\n");
+			$logger = new \Core\CustomLogger();
+			$logger->error("Connect failed: " . parent::$link->connect_error . "\n");
 			return false;
 		}
 		return true;
@@ -49,13 +49,13 @@ class MysqlManager extends DatabaseManager{
 		$resultSql->execute();
 		
 		if (!$resultSql){
-			$logger = new CustomLogger();
+			$logger = new \Core\CustomLogger();
 			$logger->error(DatabaseManager::$link->error);
 			return false;
 		}
 		
 		if ($this->getResult()->errno){
-			$logger = new CustomLogger();
+			$logger = new \Core\CustomLogger();
 			$logger->error($this->getResult()->error);
 			return false;
 		}
