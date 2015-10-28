@@ -102,7 +102,7 @@ class Patrocinio extends Model{
     public function toArray(){
         $obj = [];
         $obj['id'] = $this->getId();
-        $obj['name'] = $this->getName();
+        $obj['nombre'] = $this->getName();
         return $obj;
     }
 

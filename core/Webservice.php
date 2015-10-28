@@ -53,7 +53,7 @@ class Webservice{
         $method = strtoupper($method);
 
         if ($method != self::METHOD_GET && $paramRequest === null) {
-            $this->generate_error(3,"Invalid JSON Structure");
+            $this->generate_error(3,"Estructura JSON inv&aacute;lida");
             echo $this->output($app);
             return false;
         }
@@ -65,13 +65,13 @@ class Webservice{
             $this->param[self::PARAM_SESSIONID] = isset($this->param[self::PARAM_SESSIONID]) ? $this->param[self::PARAM_SESSIONID] : null;
 
             if (!SessionManager::isValidSession($this->param[self::PARAM_SESSIONID])){
-                $this->generate_error(5,"Invalid Session");
+                $this->generate_error(5,"Sesi&oacute;n inv&aacute;lida");
                 echo $this->output($app);
                 return false;
             }
 
             if (!SessionManager::hasSessionExpired($this->param[self::PARAM_SESSIONID])){
-                $this->generate_error(6,"Session has expired");
+                $this->generate_error(6,"Sesi&oacute;n expirada");
                 echo $this->output($app);
                 return false;
             }

@@ -6,7 +6,7 @@ require_once("models/patrocinio.php");
 
 class Congreso extends  \Model\Model{
 
-    const QUERY_FIND = "SELECT id_congreso, nombre, fecha_congreso, ponencia, lugar, patrocinio_id, fecha_creacion FROM congreso";
+    const QUERY_FIND = "SELECT C.id_congreso, C.nombre, C.fecha_congreso, C.ponencia, C.lugar, C.patrocinio_id, C.fecha_creacion,P.nombre 'patrocinio' FROM congreso C INNER JOIN patrocinio P ON C.patrocinio_id=P.id";
 
     private $id;
     private $nombre;
@@ -166,7 +166,7 @@ class Congreso extends  \Model\Model{
     */
     private static function mappingFromDBResult(&$result){
         $bindResult = [];
-        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['fecha_congreso'],$bindResult['ponencia'],$bindResult['lugar'],$bindResult['patrocinio_id'],$bindResult['fecha_creacion']);
+        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['fecha_congreso'],$bindResult['ponencia'],$bindResult['lugar'],$bindResult['patrocinio_id'],$bindResult['fecha_creacion'],$bindResult['patrocinio']);
         $results= [];
         while($result->fetch()){
             $con = new Congreso();
@@ -175,7 +175,7 @@ class Congreso extends  \Model\Model{
             $con->setFechaCongreso($bindResult['fecha_congreso']);
             $con->setPonencia($bindResult['ponencia']);
             $con->setLugar($bindResult['lugar']);
-            $con->setPatrocinio(new Patrocinio($bindResult['patrocinio_id']));
+            $con->setPatrocinio(new Patrocinio($bindResult['patrocinio_id'],$bindResult['patrocinio']));
             $con->setFechaCreacion($bindResult['fecha_creacion']);
             $results[] = $con;
         }
