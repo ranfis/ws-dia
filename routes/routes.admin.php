@@ -25,14 +25,14 @@ $app->post(\Config\Routes::CONGRESS_ADD,function() use($app,$param){
     $lugar  = isset($param['lugar']) ? $param['lugar'] : null;
     $patrocinio  = isset($param['patrocinio']) ? $param['patrocinio'] : null;
 
-    if ($nombre === null || !$nombre) $ws->generate_error(00,"El nombre del congreso es requerido");
-    else if ($fechaCongreso === null || !$fechaCongreso) $ws->generate_error(00,"La fecha del congreso es requerida");
-    else if (!StringValidator::isDate($fechaCongreso)) $ws->generate_error(00,"La fecha del congreso es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
-    else if ($ponencia === null || !$ponencia) $ws->generate_error(00,"La ponencia es requerida");
-    else if ($lugar === null || !$lugar) $ws->generate_error(00,"El lugar es requerido");
-    else if ($patrocinio === null || !$patrocinio) $ws->generate_error(00,"El patrocinio es requerido");
-    else if (!StringValidator::isInteger($patrocinio)) $ws->generate_error(00,"El patrocinio es inv&aacute;lido");
-    else if (!$pat = \Model\Patrocinio::findById($patrocinio)) $ws->generate_error(00,"Patrocinador no encontrado");
+    if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre del congreso es requerido");
+    else if ($fechaCongreso === null || !$fechaCongreso) $ws->generate_error(01,"La fecha del congreso es requerida");
+    else if (!StringValidator::isDate($fechaCongreso)) $ws->generate_error(01,"La fecha del congreso es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
+    else if ($ponencia === null || !$ponencia) $ws->generate_error(01,"La ponencia es requerida");
+    else if ($lugar === null || !$lugar) $ws->generate_error(01,"El lugar es requerido");
+    else if ($patrocinio === null || !$patrocinio) $ws->generate_error(01,"El patrocinio es requerido");
+    else if (!StringValidator::isInteger($patrocinio)) $ws->generate_error(01,"El patrocinio es inv&aacute;lido");
+    else if (!$pat = \Model\Patrocinio::findById($patrocinio)) $ws->generate_error(01,"Patrocinador no encontrado");
 
     if ($ws->error){
         echo $ws->output($app);
@@ -46,7 +46,7 @@ $app->post(\Config\Routes::CONGRESS_ADD,function() use($app,$param){
     $con->setLugar($lugar);
     $con->setPatrocinio($pat);
 
-    if (!$con->add()) $ws->generate_error(00,"Error agregando el congreso");
+    if (!$con->add()) $ws->generate_error(01,"Error agregando el congreso");
 
     echo $ws->output($app);
 });
@@ -78,7 +78,7 @@ $app->post(\Config\Routes::SPONSOR_ADD,function() use($app,$param){
     $name = isset($param['nombre']) ? $param['nombre'] : null;
 
 
-    if ($name === null || !$name) $ws->generate_error(00,"El nombre del patrocinador es requerido");
+    if ($name === null || !$name) $ws->generate_error(01,"El nombre del patrocinador es requerido");
 
     if ($ws->error){
         echo $ws->output($app);
@@ -88,7 +88,7 @@ $app->post(\Config\Routes::SPONSOR_ADD,function() use($app,$param){
     $pat = new \Model\Patrocinio();
     $pat->setName($name);
 
-    if (!$pat->add()) $ws->generate_error(00,"Error agregando patrocinador, intente nuevamente");
+    if (!$pat->add()) $ws->generate_error(01,"Error agregando patrocinador, intente nuevamente");
 
     echo $ws->output($app);
 });
@@ -101,10 +101,10 @@ $app->put(\Config\Routes::SPONSOR_UPDATE,function() use($app,$param){
     $id = isset($param['id']) ? $param['id'] : null;
     $name = isset($param['nombre']) ? $param['nombre'] : null;
 
-    if ($id === null || !$id) $ws->generate_error(00,"El id del patrocinador es requerido");
-    else if (!StringValidator::isInteger($id)) $ws->generate_error(00,"Id del patrocinador invalido");
-    else if ($name === null || !$name) $ws->generate_error(00,"El nombre del patrocinador es requerido");
-    else if (!$pat = \Model\Patrocinio::findById($id)) $ws->generate_error(00,"Patrocinador no encontrado");
+    if ($id === null || !$id) $ws->generate_error(01,"El id del patrocinador es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"Id del patrocinador invalido");
+    else if ($name === null || !$name) $ws->generate_error(01,"El nombre del patrocinador es requerido");
+    else if (!$pat = \Model\Patrocinio::findById($id)) $ws->generate_error(01,"Patrocinador no encontrado");
 
     if ($ws->error){
         echo $ws->output($app);
@@ -113,7 +113,7 @@ $app->put(\Config\Routes::SPONSOR_UPDATE,function() use($app,$param){
 
     $pat->setName($name);
 
-    if (!$pat->update()) $ws->generate_error(00,"Error actualizando el patrocinador");
+    if (!$pat->update()) $ws->generate_error(01,"Error actualizando el patrocinador");
 
     echo $ws->output($app);
 });
