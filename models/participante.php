@@ -151,14 +151,16 @@ class Participante extends Model{
      * Method to update participante
     */
     public function update(){
+        if ($this->getId() == null) return null;
         if (!self::connectDB()) return null;
+
         $query = "UPDATE participante SET NOMBRE=?,APELLIDO=? WHERE ID=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
         $result->bind_param("ssi",$this->nombre,$this->apellido,$this->id);
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        return true;
     }
 
 }

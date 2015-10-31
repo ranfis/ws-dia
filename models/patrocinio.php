@@ -130,11 +130,9 @@ class Patrocinio extends Model{
         if (!self::connectDB()) return null;
         $query = "UPDATE patrocinio SET NOMBRE=? WHERE ID=?";
         $query = self::formatQuery($query);
-
         if (!$result = self::$dbManager->query($query)) return null;
         $result->bind_param("si",$this->getName(),$this->getId());
         if (!self::$dbManager->executeSql($result)) return null;
-
-        return $result->affected_rows > 0;
+        return true;
     }
 }
