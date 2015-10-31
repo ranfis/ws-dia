@@ -4,7 +4,8 @@ require_once("models/participante.php");
 
 $app->get(\Config\Routes::CONGRESS_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
-    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
     $results = \Model\Congreso::find();
 
     $congresses = [];
@@ -99,7 +100,7 @@ $app->post(\Config\Routes::CONGRESS_ADD,function() use($app,$param){
 
 $app->put(\Config\Routes::CONGRESS_UPDATE,function() use($app,$param){
     $ws = new \Core\Webservice();
-    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
 
     //validate the param
     if (!$con = validateCongress($ws,$app,$param,true)) return;
