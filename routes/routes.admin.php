@@ -112,7 +112,8 @@ $app->put(\Config\Routes::CONGRESS_UPDATE,function() use($app,$param){
 
 $app->get(\Config\Routes::SPONSOR_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
-    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
     $results = \Model\Patrocinio::find();
 
     $sponsors = [];
