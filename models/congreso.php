@@ -4,6 +4,8 @@ namespace Model;
 require_once("models/model.php");
 require_once("models/patrocinio.php");
 
+use DatabaseManager;
+
 class Congreso extends  \Model\Model{
 
     const QUERY_FIND = "SELECT C.id_congreso, C.nombre, C.fecha_congreso, C.ponencia, C.lugar, C.patrocinio_id, C.fecha_creacion,P.nombre 'patrocinio' FROM congreso C INNER JOIN patrocinio P ON C.patrocinio_id=P.id";
@@ -12,6 +14,7 @@ class Congreso extends  \Model\Model{
     private $nombre;
     private $fechaCongreso;
     private $ponencia;
+    private $participantes;
     private $lugar;
     private $patrocinio;
     private $fechaCreacion;
@@ -129,6 +132,23 @@ class Congreso extends  \Model\Model{
     }
 
     /**
+     * @return mixed
+     */
+    public function getParticipantes()
+    {
+        return $this->participantes;
+    }
+
+    /**
+     * @param mixed $participantes
+     */
+    public function setParticipantes($participantes)
+    {
+        $this->participantes = $participantes;
+    }
+
+
+    /**
      * Method to find the congress by id
     */
     public static function findById($id){
@@ -150,7 +170,7 @@ class Congreso extends  \Model\Model{
 
         $query = self::formatQuery($query);
 
-        if ($id) $query.= " WHERE ID=?";
+        if ($id) $query.= " WHERE id_congreso=?";
 
         if (!$result = self::$dbManager->query($query)) return $results;
 
@@ -210,6 +230,9 @@ class Congreso extends  \Model\Model{
     public function update(){
         if (!$this->getId()) return null;
         if (!self::connectDB()) return null;
+
+        DatabaseManager::$link->autocommit(FALSE);
+
         $query = "UPDATE congreso SET nombre=?,fecha_congreso=?,ponencia=?,lugar=?,patrocinio_id=? WHERE id_congreso=?";
         $query = self::formatQuery($query);
 
@@ -217,7 +240,29 @@ class Congreso extends  \Model\Model{
         $result->bind_param("ssssii",$this->getNombre(),$this->getFechaCongreso(),$this->getPonencia(),$this->getLugar(),$this->getPatrocinio()->getId(),$this->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        $ret = null;
+
+        //remove all authors
+        $query = "DELETE FROM congreso_autor WHERE congreso_id_congreso=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        //end: remove all authors
+
+        if ($this->persistAuthors($result)){
+            DatabaseManager::$link->commit();
+            $ret = true;
+        }
+        else
+            DatabaseManager::$link->rollback();
+        return $ret;
     }
 
     /**
@@ -225,6 +270,8 @@ class Congreso extends  \Model\Model{
     */
     public function add(){
         if (!self::connectDB()) return null;
+        DatabaseManager::$link->autocommit(FALSE);
+
         $query = "INSERT INTO congreso(nombre, fecha_congreso, ponencia, lugar, patrocinio_id, fecha_creacion) VALUES (?,?,?,?,?,NOW())";
         $query = self::formatQuery($query);
 
@@ -232,6 +279,40 @@ class Congreso extends  \Model\Model{
         $result->bind_param("ssssi",$this->getNombre(),$this->getFechaCongreso(),$this->getPonencia(),$this->getLugar(),$this->patrocinio->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        $ret = false;
+        if ($result->affected_rows > 0){
+            $this->setId($result->insert_id);
+            if ($this->persistAuthors($result)) {
+                DatabaseManager::$link->commit();
+                $ret = true;
+            }
+            else
+                DatabaseManager::$link->rollback();
+        }
+        return $ret;
+    }
+
+    /**
+     * Method to persists Authors
+    */
+    private function persistAuthors(&$result){
+        if (!is_array($this->getParticipantes()) || count($this->getParticipantes()) == 0)
+            return false;
+        //add the participants
+        foreach($this->getParticipantes() as $par){
+            $query = "INSERT INTO congreso_autor(congreso_id_congreso,participante_ID) VALUES (?,?)";
+            $query = self::formatQuery($query);
+            if (!$result = self::$dbManager->query($query)) {
+                DatabaseManager::$link->rollback();
+                return false;
+            }
+
+            $result->bind_param("ii",$this->getId(),$par->getId());
+            if (!self::$dbManager->executeSql($result)) {
+                DatabaseManager::$link->rollback();
+                return false;
+            }
+        }
+        return true;
     }
 }

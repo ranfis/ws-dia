@@ -16,11 +16,14 @@ class StringValidator{
 		$pattern = "/^[0-9]+$/";
 		return preg_match($pattern,$input);
 	}
-	
-	public static function isIccid($input){
-		$pattern = "/^[0-9]{19}$/";
-		return preg_match($pattern,$input);
-	}
+
+
+    /**
+     *Method to validate if the input is a JSON
+    */
+    public static  function isJSON($string){
+        return is_string($string) && is_object(json_decode($string));
+    }
 	
 	/**
 	 * Method to validate if the input is a date (YYYY-MM-DD)

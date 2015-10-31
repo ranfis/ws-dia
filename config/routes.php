@@ -15,11 +15,11 @@ class Routes{
     const  SPONSOR_LIST = "/sponsor/list";
 
     //POST
-    const  PARTICIPANTS_ADD = "/participants/add";
+    const  PARTICIPANTS_ADD = "/participant/add";
     //PUT
-    const  PARTICIPANTS_UPDATE = "/participants/update";
+    const  PARTICIPANTS_UPDATE = "/participant/update";
     //GET
-    const  PARTICIPANTS_LIST = "/participants/list";
+    const  PARTICIPANTS_LIST = "/participant/list";
 
     //POST
     const  CONGRESS_ADD = "/congress/add";

@@ -5,6 +5,7 @@ require_once("config/config.php");
 require_once("core/database/MysqlManager.php");
 
 use Config\Config;
+use DatabaseManager;
 
 use MysqlManager;
 
