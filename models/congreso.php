@@ -354,7 +354,7 @@ class Congreso extends  \Model\Model{
             return false;
         //add the participants
         foreach($this->getParticipantes() as $par){
-            $query = "INSERT INTO congreso_autor(congreso_id_congreso,participante_ID,estatus) VALUES (?,?)";
+            $query = "INSERT INTO congreso_autor(congreso_id_congreso,participante_ID) VALUES (?,?)";
             $query = self::formatQuery($query);
             if (!$result = self::$dbManager->query($query)) {
                 DatabaseManager::$link->rollback();
