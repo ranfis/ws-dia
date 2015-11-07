@@ -101,7 +101,7 @@ class Participante extends Model{
     public static function findByCongress($congressId){
         if (!self::connectDB()) return null;
 
-        $query = "SELECT P.ID,P.NOMBRE,P.APELLIDO FROM congreso_autor CA INNER JOIN participante P ON CA.participante_ID=P.ID";
+        $query = "SELECT P.ID,P.NOMBRE,P.APELLIDO,P.estatus FROM congreso_autor CA INNER JOIN participante P ON CA.participante_ID=P.ID";
         $query.= " WHERE CA.congreso_id_congreso=? AND P.estatus != 3";
 
         $query = self::formatQuery($query);
