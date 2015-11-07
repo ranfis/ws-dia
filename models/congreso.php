@@ -3,12 +3,14 @@ namespace Model;
 
 require_once("models/model.php");
 require_once("models/patrocinio.php");
+require_once("models/participante.php");
+require_once("models/estatus.php");
 
 use DatabaseManager;
 
 class Congreso extends  \Model\Model{
 
-    const QUERY_FIND = "SELECT C.id_congreso, C.nombre, C.fecha_congreso, C.ponencia, C.lugar, C.patrocinio_id, C.fecha_creacion,P.nombre 'patrocinio' FROM congreso C INNER JOIN patrocinio P ON C.patrocinio_id=P.id";
+    const QUERY_FIND = "SELECT C.id_congreso, C.nombre, C.fecha_congreso, C.ponencia, C.lugar, C.patrocinio_id, C.fecha_creacion,P.nombre 'patrocinio',C.estatus FROM congreso C INNER JOIN patrocinio P ON C.patrocinio_id=P.id";
 
     private $id;
     private $nombre;
@@ -18,6 +20,7 @@ class Congreso extends  \Model\Model{
     private $lugar;
     private $patrocinio;
     private $fechaCreacion;
+    private $estatus;
 
     /**
      * @return mixed
@@ -147,6 +150,23 @@ class Congreso extends  \Model\Model{
         $this->participantes = $participantes;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getEstatus()
+    {
+        return $this->estatus;
+    }
+
+    /**
+     * @param mixed $estatus
+     */
+    public function setEstatus($estatus)
+    {
+        $this->estatus = $estatus;
+    }
+
+
 
     /**
      * Method to find the congress by id
@@ -168,9 +188,10 @@ class Congreso extends  \Model\Model{
         $query = self::QUERY_FIND;
         $results = [];
 
-        $query = self::formatQuery($query);
+        $query.= " WHERE C.estatus != 3";
+        if ($id) $query.= " AND C.id_congreso=?";
 
-        if ($id) $query.= " WHERE id_congreso=?";
+        $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return $results;
 
@@ -186,8 +207,9 @@ class Congreso extends  \Model\Model{
     */
     private static function mappingFromDBResult(&$result){
         $bindResult = [];
-        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['fecha_congreso'],$bindResult['ponencia'],$bindResult['lugar'],$bindResult['patrocinio_id'],$bindResult['fecha_creacion'],$bindResult['patrocinio']);
+        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['fecha_congreso'],$bindResult['ponencia'],$bindResult['lugar'],$bindResult['patrocinio_id'],$bindResult['fecha_creacion'],$bindResult['patrocinio'],$bindResult['estatus']);
         $results= [];
+
         while($result->fetch()){
             $con = new Congreso();
             $con->setId($bindResult['id']);
@@ -197,6 +219,11 @@ class Congreso extends  \Model\Model{
             $con->setLugar($bindResult['lugar']);
             $con->setPatrocinio(new Patrocinio($bindResult['patrocinio_id'],$bindResult['patrocinio']));
             $con->setFechaCreacion($bindResult['fecha_creacion']);
+            $con->setEstatus(new Estatus($bindResult['estatus']));
+
+            $participantes = Participante::findByCongress($con->getId());
+            $con->setParticipantes($participantes);
+
             $results[] = $con;
         }
         return $results;
@@ -220,9 +247,34 @@ class Congreso extends  \Model\Model{
         }
         $obj['fecha_creacion'] = $this->getFechaCreacion();
 
+        $obj['participante'] = [];
+        foreach($this->getParticipantes() as $par){
+            $objPar = [];
+            $objPar['id'] = $par->getId();
+            $objPar['nombre'] = $par->getNombre();
+            $objPar['apellido'] = $par->getApellido();
+
+            $obj['participante'][] = $objPar;
+        }
         return $obj;
     }
 
+
+    /**
+     * Method to delete an object from database
+    */
+    public function delete(){
+        if (!$this->getId()) return false;
+
+        $query = "UPDATE congreso SET estatus=3 WHERE id_congreso=?";
+        $query = self::formatQuery($query);
+
+        if (!$result = self::$dbManager->query($query)) return false;
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) return false;
+
+        return $result->affected_rows > 0;
+    }
 
     /**
      * Method  to update a congress
@@ -272,11 +324,13 @@ class Congreso extends  \Model\Model{
         if (!self::connectDB()) return null;
         DatabaseManager::$link->autocommit(FALSE);
 
-        $query = "INSERT INTO congreso(nombre, fecha_congreso, ponencia, lugar, patrocinio_id, fecha_creacion) VALUES (?,?,?,?,?,NOW())";
+        $this->setEstatus(new Estatus(1));
+
+        $query = "INSERT INTO congreso(nombre, fecha_congreso, ponencia, lugar, patrocinio_id, estatus, fecha_creacion) VALUES (?,?,?,?,?,?,NOW())";
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return null;
-        $result->bind_param("ssssi",$this->getNombre(),$this->getFechaCongreso(),$this->getPonencia(),$this->getLugar(),$this->patrocinio->getId());
+        $result->bind_param("ssssii",$this->getNombre(),$this->getFechaCongreso(),$this->getPonencia(),$this->getLugar(),$this->patrocinio->getId(),$this->estatus->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
         $ret = false;
@@ -300,7 +354,7 @@ class Congreso extends  \Model\Model{
             return false;
         //add the participants
         foreach($this->getParticipantes() as $par){
-            $query = "INSERT INTO congreso_autor(congreso_id_congreso,participante_ID) VALUES (?,?)";
+            $query = "INSERT INTO congreso_autor(congreso_id_congreso,participante_ID,estatus) VALUES (?,?)";
             $query = self::formatQuery($query);
             if (!$result = self::$dbManager->query($query)) {
                 DatabaseManager::$link->rollback();

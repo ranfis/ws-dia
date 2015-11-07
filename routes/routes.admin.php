@@ -110,6 +110,24 @@ $app->put(\Config\Routes::CONGRESS_UPDATE,function() use($app,$param){
     echo $ws->output($app);
 });
 
+$app->put(\Config\Routes::CONGRESS_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El congreso a eliminar es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El congreso es inv&aacute;lido");
+    else if (!$congress = \Model\Congreso::findById($id)) $ws->generate_error(01,"El congreso no fue encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$congress->delete()) $ws->generate_error(01,"No se pudo eliminar el congreo, intente mas tarde");
+    echo $ws->output($app);
+});
+
 
 $app->get(\Config\Routes::SPONSOR_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
@@ -120,7 +138,6 @@ $app->get(\Config\Routes::SPONSOR_LIST,function() use ($app,$param){
     $sponsors = [];
     foreach($results as $pat)
         $sponsors[] = $pat->toArray();
-
 
     $ws->result = $sponsors;
     echo $ws->output($app);
@@ -174,6 +191,25 @@ $app->put(\Config\Routes::SPONSOR_UPDATE,function() use($app,$param){
 
     echo $ws->output($app);
 });
+
+$app->put(\Config\Routes::SPONSOR_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El patrocinador a eliminar es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El patrocinador es inv&aacute;lido");
+    else if (!$sponsor = \Model\Patrocinio::findById($id)) $ws->generate_error(01,"El patrocinador no fue encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$sponsor->delete()) $ws->generate_error(01,"No se pudo eliminar el patrocinador, intente mas tarde");
+    echo $ws->output($app);
+});
+
 
 $app->get(\Config\Routes::PARTICIPANTS_LIST,function() use($app){
     $ws = new \Core\Webservice();
@@ -237,5 +273,23 @@ $app->post(\Config\Routes::PARTICIPANTS_ADD, function() use($param,$app){
 
     if (!$p->add()) $ws->generate_error(01,"Error agregando el participante");
 
+    echo $ws->output($app);
+});
+
+$app->put(\Config\Routes::PARTICIPANTS_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El participante a eliminar es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El participante es inv&aacute;lido");
+    else if (!$sponsor = \Model\Participante::findById($id)) $ws->generate_error(01,"El participante no fue encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$sponsor->delete()) $ws->generate_error(01,"No se pudo eliminar el participante, intente mas tarde");
     echo $ws->output($app);
 });

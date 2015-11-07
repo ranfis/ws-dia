@@ -4,11 +4,12 @@ require_once("models/model.php");
 
 class Patrocinio extends Model{
 
-    const QUERY_FIND = "SELECT id,nombre FROM patrocinio";
+    const QUERY_FIND = "SELECT id,nombre,estatus FROM patrocinio";
 
 
     private $id;
     private $name;
+    private $estatus;
 
     /**
      * @return mixed
@@ -42,10 +43,28 @@ class Patrocinio extends Model{
         $this->name = $name;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getEstatus()
+    {
+        return $this->estatus;
+    }
+
+    /**
+     * @param mixed $estatus
+     */
+    private function setEstatus($estatus)
+    {
+        $this->estatus = $estatus;
+    }
+
+
     public function __construct($id = null, $name = null)
     {
         $this->setId($id);
         $this->setName($name);
+        $this->setEstatus(new Estatus(1));
     }
 
     public static function findById($id){
@@ -70,6 +89,8 @@ class Patrocinio extends Model{
     public static function find(){
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
+
+        $query.= " WHERE estatus !=3";
         $results = [];
 
         $query = self::formatQuery($query);
@@ -86,11 +107,12 @@ class Patrocinio extends Model{
     private static function mappingFromDBResult(&$result){
         $bindResult = [];
         $results = [];
-        $result->bind_result($bindResult['id'],$bindResult['name']);
+        $result->bind_result($bindResult['id'],$bindResult['name'],$bindResult['estatus']);
         while($result->fetch()){
             $pat = new Patrocinio();
             $pat->setId($bindResult['id']);
             $pat->setName($bindResult['name']);
+            $pat->setEstatus(new Estatus($bindResult['estatus']));
             $results[] = $pat;
         }
         return $results;
@@ -111,14 +133,28 @@ class Patrocinio extends Model{
     */
     public function add(){
         if (!self::connectDB()) return null;
-        $query = "INSERT INTO patrocinio (nombre) VALUES (?)";
+        $query = "INSERT INTO patrocinio (nombre,estatus) VALUES (?,?)";
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return null;
-        $result->bind_param("s",$this->getName());
+        $result->bind_param("si",$this->getName(),$this->getEstatus()->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
         return $result->affected_rows > 0;
+    }
+
+    /**
+     * Method to delete the sponsor
+     */
+    public function delete(){
+        if (!$this->getId()) return false;
+        if (!self::connectDB()) return false;
+        $query = "UPDATE patrocinio SET estatus=3 WHERE ID=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return false;
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) return false;
+        return true;
     }
 
 
@@ -126,13 +162,13 @@ class Patrocinio extends Model{
      * Method to add the sponsor
      */
     public function update(){
-        if (!$this->getId()) return null;
-        if (!self::connectDB()) return null;
+        if (!$this->getId()) return false;
+        if (!self::connectDB()) return false;
         $query = "UPDATE patrocinio SET NOMBRE=? WHERE ID=?";
         $query = self::formatQuery($query);
-        if (!$result = self::$dbManager->query($query)) return null;
+        if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("si",$this->getName(),$this->getId());
-        if (!self::$dbManager->executeSql($result)) return null;
+        if (!self::$dbManager->executeSql($result)) return false;
         return true;
     }
 }

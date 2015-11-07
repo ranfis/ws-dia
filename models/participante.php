@@ -5,11 +5,12 @@ require_once("models/model.php");
 
 class Participante extends Model{
 
-    const QUERY_FIND = "SELECT ID, NOMBRE, APELLIDO FROM participante";
+    const QUERY_FIND = "SELECT ID, NOMBRE, APELLIDO,ESTATUS FROM participante";
 
     private $id;
     private $nombre;
     private $apellido;
+    private $status;
 
     /**
      * @return null
@@ -59,12 +60,28 @@ class Participante extends Model{
         $this->apellido = $apellido;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param mixed $status
+     */
+    private function setStatus($status)
+    {
+        $this->status = $status;
+    }
 
     public function __construct($id = null, $nombre= null,$apellido = null)
     {
         $this->id = $id;
         $this->nombre = $nombre;
         $this->apellido = $apellido;
+        $this->setStatus(new Estatus(1));
     }
 
     /**
@@ -80,13 +97,35 @@ class Participante extends Model{
     }
 
     /**
+    */
+    public static function findByCongress($congressId){
+        if (!self::connectDB()) return null;
+
+        $query = "SELECT P.ID,P.NOMBRE,P.APELLIDO FROM congreso_autor CA INNER JOIN participante P ON CA.participante_ID=P.ID";
+        $query.= " WHERE CA.congreso_id_congreso=? AND P.estatus != 3";
+
+        $query = self::formatQuery($query);
+
+        if (!$result = self::$dbManager->query($query)) return null;
+        $result->bind_param("i",$congressId);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        $results = self::mappingFromDBResult($result);
+        return $results;
+    }
+
+
+    /**
      * Method to find all participantes, can be filter by id
     */
     public static function find($id = null,$pag = null){
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
+
+        $query.= " WHERE ESTATUS != 3";
+        if ($id) $query.= " AND ID=?";
+
         $query = self::formatQuery($query);
-        if ($id) $query.= " WHERE ID=?";
 
         if (!$result = self::$dbManager->query($query)) return null;
 
@@ -104,12 +143,12 @@ class Participante extends Model{
     */
     public function add(){
         if (!self::connectDB()) return null;
-        $query = "INSERT INTO participante(NOMBRE, APELLIDO) VALUES (?,?)";
+
+        $query = "INSERT INTO participante(NOMBRE, APELLIDO,estatus) VALUES (?,?,?)";
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return null;
-        $result->bind_param("ss",$this->nombre,$this->apellido);
-
+        $result->bind_param("ssi",$this->nombre,$this->apellido,$this->getStatus()->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
         return $result->affected_rows > 0;
@@ -121,9 +160,10 @@ class Participante extends Model{
     private function mappingFromDBResult(&$result){
         $bindResult = [];
         $results = [];
-        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['apellido']);
+        $result->bind_result($bindResult['id'],$bindResult['nombre'],$bindResult['apellido'],$bindResult['estatus']);
         while($result->fetch()){
             $p = new Participante($bindResult['id'],$bindResult['nombre'],$bindResult['apellido']);
+            $p->setStatus(new Estatus($bindResult['estatus']));
             $results[] = $p;
         }
         return $results;
@@ -144,6 +184,22 @@ class Participante extends Model{
             $results[] = $p;
         }
         return $results;
+    }
+
+    /**
+     * Method to delete the participante
+    */
+    public function delete(){
+        if ($this->getId() == null) return false;
+        if (!self::connectDB()) return false;
+
+        $query = "UPDATE participante SET ESTATUS=3 WHERE ID=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return false;
+        $result->bind_param("i",$this->id);
+        if (!self::$dbManager->executeSql($result)) return false;
+
+        return true;
     }
 
 

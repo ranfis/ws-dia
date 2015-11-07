@@ -14,6 +14,8 @@ class Routes{
     //GET
     const  SPONSOR_LIST = "/sponsor/list";
 
+    const  SPONSOR_DEL = "/sponsor/del";
+
     //POST
     const  PARTICIPANTS_ADD = "/participant/add";
     //PUT
@@ -21,12 +23,19 @@ class Routes{
     //GET
     const  PARTICIPANTS_LIST = "/participant/list";
 
+    //PUT
+    const  PARTICIPANTS_DEL = "/participant/del";
+
     //POST
     const  CONGRESS_ADD = "/congress/add";
     //PUT
     const  CONGRESS_UPDATE = "/congress/update";
     //GET
     const  CONGRESS_LIST = "/congress/list";
+
+    //PUT
+    const  CONGRESS_DEL = "/congress/del";
+
     //end: Congress
 
 }
