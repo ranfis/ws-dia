@@ -5,7 +5,7 @@ require_once("models/model.php");
 
 class Participante extends Model{
 
-    const QUERY_FIND = "SELECT ID, NOMBRE, APELLIDO,ESTATUS FROM participante";
+    const QUERY_FIND = "SELECT ID, NOMBRE, APELLIDO,estatus FROM participante";
 
     private $id;
     private $nombre;
@@ -122,7 +122,7 @@ class Participante extends Model{
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
 
-        $query.= " WHERE ESTATUS != 3";
+        $query.= " WHERE estatus != 3";
         if ($id) $query.= " AND ID=?";
 
         $query = self::formatQuery($query);
@@ -193,7 +193,7 @@ class Participante extends Model{
         if ($this->getId() == null) return false;
         if (!self::connectDB()) return false;
 
-        $query = "UPDATE participante SET ESTATUS=3 WHERE ID=?";
+        $query = "UPDATE participante SET estatus=3 WHERE ID=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("i",$this->id);
