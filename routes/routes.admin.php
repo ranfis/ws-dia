@@ -81,6 +81,11 @@ function validateCongress(&$ws,&$app,&$param,$update = false){
     return $con;
 }
 
+$app->options('/(:name+)', function() use ($app) {
+    $app->response()->header('Access-Control-Allow-Origin','*');
+    $app->response()->header('Access-Control-Allow-Methods','PUT');
+    $app->response()->header('Access-Control-Allow-Headers', 'X-Requested-With, X-authentication, X-client');
+});
 
 $app->post(\Config\Routes::CONGRESS_ADD,function() use($app,$param){
     $ws = new \Core\Webservice();
