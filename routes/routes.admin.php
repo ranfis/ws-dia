@@ -1,6 +1,7 @@
 <?php
 require_once("models/congreso.php");
 require_once("models/participante.php");
+require_once("models/revistaPublicacion.php");
 
 $app->get(\Config\Routes::CONGRESS_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
@@ -296,5 +297,83 @@ $app->put(\Config\Routes::PARTICIPANTS_DEL, function() use($app,$param){
         return;
     }
     if (!$sponsor->delete()) $ws->generate_error(01,"No se pudo eliminar el participante, intente mas tarde");
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::JOURNAL_ADD, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $name = isset($param['description']) ? $param['description'] : null;
+    if ($name === null || !$name) $ws->generate_error(01,"La descripcion es requerida");
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $revista = new \Model\RevistaPublicacion(null,$name);
+    if (!$revista->add()) $ws->generate_error(01,"Error agregando la revista");
+    echo $ws->output($app);
+});
+
+
+$app->put(\Config\Routes::JOURNAL_UPDATE, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+    $name = isset($param['description']) ? $param['description'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El id es requerido");
+    else if ($name === null || !$name) $ws->generate_error(01,"La descripcion es requerida");
+    else if (!$revista = \Model\RevistaPublicacion::findById($id)) $ws->generate_error(01,"Revista de publicacion invalida");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $revista->setDescripcion($name);
+
+    if (!$revista->update()) $ws->generate_error(01,"Error Actualizando la revista");
+
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::JOURNAL_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El id es requerido");
+    else if (!$revista = \Model\RevistaPublicacion::findById($id)) $ws->generate_error(01,"Revista de publicacion invalida");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+
+    if (!$revista->delete()) $ws->generate_error(01,"Error Eliminando la revista de la publicaci&oacute;n");
+
+    echo $ws->output($app);
+});
+
+$app->get(\Config\Routes::JOURNAL_LIST, function() use($app){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : [];
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+    $result = \Model\RevistaPublicacion::find();
+
+
+    $results = [];
+    foreach($result as $revista){
+        $results[] = \Model\RevistaPublicacion::mappingToArray($revista);
+    }
+
+    $ws->result = $results;
     echo $ws->output($app);
 });

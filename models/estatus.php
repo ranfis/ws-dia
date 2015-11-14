@@ -5,6 +5,9 @@ require_once("models/model.php");
 
 class Estatus extends Model{
 
+    const ESTATUS_ACTIVED = 1;
+    const ESTATUS_REMOVED = 3;
+
     private $id;
     private $name;
 

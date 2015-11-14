@@ -2,41 +2,82 @@
 namespace Config;
 
 class Routes{
-    const USER_LOGIN = "/login";
-    const USER_SUMMARY = "/summary";
-    const USER_LOGOUT = "/logout";
+    const USER_LOGIN            = "/login";
+    const USER_SUMMARY          = "/summary";
+    const USER_LOGOUT           = "/logout";
 
     //Congress
     //POST
-    const  SPONSOR_ADD = "/sponsor/add";
+    const  SPONSOR_ADD          = "/sponsor/add";
     //PUT
-    const  SPONSOR_UPDATE = "/sponsor/update";
+    const  SPONSOR_UPDATE       = "/sponsor/update";
     //GET
-    const  SPONSOR_LIST = "/sponsor/list";
+    const  SPONSOR_LIST         = "/sponsor/list";
 
-    const  SPONSOR_DEL = "/sponsor/del";
+    const  SPONSOR_DEL          = "/sponsor/del";
 
     //POST
-    const  PARTICIPANTS_ADD = "/participant/add";
+    const  PARTICIPANTS_ADD     = "/participant/add";
     //PUT
-    const  PARTICIPANTS_UPDATE = "/participant/update";
+    const  PARTICIPANTS_UPDATE  = "/participant/update";
     //GET
-    const  PARTICIPANTS_LIST = "/participant/list";
+    const  PARTICIPANTS_LIST    = "/participant/list";
 
     //PUT
-    const  PARTICIPANTS_DEL = "/participant/del";
+    const  PARTICIPANTS_DEL     = "/participant/del";
 
     //POST
-    const  CONGRESS_ADD = "/congress/add";
+    const  CONGRESS_ADD         = "/congress/add";
     //PUT
-    const  CONGRESS_UPDATE = "/congress/update";
+    const  CONGRESS_UPDATE      = "/congress/update";
     //GET
-    const  CONGRESS_LIST = "/congress/list";
+    const  CONGRESS_LIST        = "/congress/list";
 
     //PUT
-    const  CONGRESS_DEL = "/congress/del";
-
+    const  CONGRESS_DEL         = "/congress/del";
     //end: Congress
+
+
+    //POST
+    const JOURNAL_ADD           = "/journal/add";
+    //PUT
+    const JOURNAL_UPDATE        = "/journal/update";
+    //POST
+    const JOURNAL_DEL           = "/journal/del";
+    //GET
+    const JOURNAL_LIST          = "/journal/list";
+
+    //POST
+    const ARTICLE_ADD           = "/article/add";
+    //PUT
+    const ARTICLE_UPDATE        = "/article/update";
+    //POST
+    const ARTICLE_DEL           = "/article/del";
+    //GET
+    const ARTICLE_LIST          = "/article/list";
+
+
+    //POST
+    const FUND_ADD              = "/fund/add";
+    //PUT
+    const FUND_UPDATE           = "/fund/update";
+    //POST
+    const FUND_DEL              = "/fund/del";
+    //GET
+    const FUND_LIST             = "/fund/list";
+
+
+    //POST
+    const EXECUTING_UNIT_ADD    = "/executing_unit/add";
+    //PUT
+    const EXECUTING_UNIT_UPDATE = "/executing_unit/update";
+    //POST
+    const EXECUTING_UNIT_DEL    = "/executing_unit/del";
+    //GET
+    const EXECUTING_UNIT_LIST   = "/executing_unit/list";
+
+
+
 
 }
 
