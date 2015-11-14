@@ -342,7 +342,7 @@ $app->put(\Config\Routes::JOURNAL_UPDATE, function() use($app,$param){
 });
 
 
-$app->post(\Config\Routes::JOURNAL_DEL, function() use($app,$param){
+$app->put(\Config\Routes::JOURNAL_DEL, function() use($app,$param){
     $ws = new \Core\Webservice();
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
 
