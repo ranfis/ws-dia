@@ -4,6 +4,7 @@ namespace Model;
 require_once("models/model.php");
 require_once("models/estatus.php");
 require_once("models/revistaPublicacion.php");
+require_once("models/participante.php");
 
 use DatabaseManager;
 
@@ -308,6 +309,8 @@ class Publicacion extends Model{
             $publicacion->setPagina($bindResult['pagina']);
             $publicacion->setPropiedadIntelectual($bindResult['propiedad_intelectual'] ? true : false);
             $publicacion->setEstatus(new Estatus($bindResult['estatus']));
+            $publicacion->setParticipantes(Participante::findByPublication($bindResult['id']));
+
             $results[] = $publicacion;
         }
         return $results;
@@ -332,7 +335,15 @@ class Publicacion extends Model{
         $result['volume']           = $publicacion->getVolumen();
         $result['pages']            = $publicacion->getPagina();
         $result['intellectual_prop']    = $publicacion->hasPropiedadIntelectual();
-
+        
+        $result['participante'] = [];
+        foreach($publicacion->getParticipantes() as $par){
+            $objPar = [];
+            $objPar['id'] = $par->getId();
+            $objPar['nombre'] = $par->getNombre();
+            $objPar['apellido'] = $par->getApellido();
+            $result['participante'][] = $objPar;
+        }
         return $result;
     }
 }

@@ -116,6 +116,25 @@ class Participante extends Model{
 
 
     /**
+     * Method to get participants by publicacition
+     */
+    public static function findByPublication($pubId){
+        if (!self::connectDB()) return null;
+
+        $query = "SELECT P.ID,P.NOMBRE,P.APELLIDO,P.estatus FROM publicacion_autor PA INNER JOIN participante P ON PA.participante_id=P.ID";
+        $query.= " WHERE PA.publicacion_id_publicacion=? AND P.estatus != 3";
+
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+        $result->bind_param("i",$pubId);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        $results = self::mappingFromDBResult($result);
+        return $results;
+    }
+
+
+    /**
      * Method to find all participantes, can be filter by id
     */
     public static function find($id = null,$pag = null){
