@@ -5,6 +5,7 @@ require_once("models/model.php");
 require_once("models/estatus.php");
 require_once("models/revistaPublicacion.php");
 
+use DatabaseManager;
 
 class Publicacion extends Model{
     const QUERY_FIND = "SELECT id_publicacion, descripcion, fecha, id_revista_publicacion, volumen, pagina, propiedad_intelectual, estatus FROM publicacion";
@@ -16,6 +17,7 @@ class Publicacion extends Model{
     private $volumen;
     private $pagina;
     private $propiedadIntelectual;
+    private $participantes;
     private $estatus;
 
     /**
@@ -146,6 +148,22 @@ class Publicacion extends Model{
         $this->estatus = $estatus;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getParticipantes()
+    {
+        return $this->participantes;
+    }
+
+    /**
+     * @param mixed $participantes
+     */
+    public function setParticipantes($participantes)
+    {
+        $this->participantes = $participantes;
+    }
+
     public function __construct($id = null,$descripcion = null)
     {
         $this->id = $id;
@@ -153,6 +171,9 @@ class Publicacion extends Model{
     }
 
 
+    /**
+     * method to add the publication
+    */
     public function add(){
         if (!self::connectDB()) return null;
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
@@ -161,40 +182,92 @@ class Publicacion extends Model{
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
 
-        $result->bind_param("ssissii",$this->descripcion,$this->fecha,$this->getRevista()->getId(),$this->estatus->getId());
+        $result->bind_param("ssissii",$this->descripcion,$this->fecha,$this->getRevista()->getId(),$this->getVolumen(),$this->getPagina(),$this->hasPropiedadIntelectual(),$this->estatus->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        $ret = false;
+        if ($result->affected_rows > 0){
+            $this->setId($result->insert_id);
+            if ($this->persistAuthors($result)) {
+                DatabaseManager::$link->commit();
+                $ret = true;
+            }
+            else
+                DatabaseManager::$link->rollback();
+        }
+        return $ret;
     }
 
 
-    public function update(){
-        if (!$this->id) return null;
-        if (!self::connectDB()) return null;
+    /**
+     * Method to persists Authors
+     */
+    private function persistAuthors(&$result){
+        if (!is_array($this->getParticipantes()) || count($this->getParticipantes()) == 0)
+            return false;
+        //add the participants
+        foreach($this->getParticipantes() as $par){
+            $query = "INSERT INTO publicacion_autor(publicacion_id_publicacion,participante_id) VALUES (?,?)";
+            $query = self::formatQuery($query);
+            if (!$result = self::$dbManager->query($query)) {
+                DatabaseManager::$link->rollback();
+                return false;
+            }
 
-        $query = "";
-        $query = self::formatQuery($query);
-        if (!$result = self::$dbManager->query($query)) return null;
-        $result->bind_param("si",$this->descripcion,$this->id);
-        if (!self::$dbManager->executeSql($result)) return null;
-
+            $result->bind_param("ii",$this->getId(),$par->getId());
+            if (!self::$dbManager->executeSql($result)) {
+                DatabaseManager::$link->rollback();
+                return false;
+            }
+        }
         return true;
     }
 
 
+    /**
+     * Method to update the publication
+    */
+    public function update(){
+        if (!$this->id) return null;
+        if (!self::connectDB()) return null;
+        $query = "UPDATE publicacion SET descripcion=?,fecha=?,id_revista_publicacion=?,volumen=?,pagina=?,propiedad_intelectual=?,estatus=? WHERE id_publicacion=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+        $result->bind_param("ssisssii",$this->getDescripcion(),$this->getFecha(),$this->getRevista()->getId(),$this->getVolumen(),$this->getPagina(),$this->hasPropiedadIntelectual(),$this->getEstatus()->getId(),$this->getId());
+        if (!self::$dbManager->executeSql($result)) return null;
+        return true;
+    }
+
+
+    /**
+     * Method to delete the publication
+    */
     public function delete(){
         if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
 
-        $query = "UPDATE publicacion SET status=? WHERE id_publicacion=?";
+        $query = "UPDATE publicacion SET estatus=? WHERE id_publicacion=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("ii",$this->estatus->getId(),$this->id);
         if (!self::$dbManager->executeSql($result)) return null;
 
         return true;
+    }
+
+    /**
+     * Method to find the publication by id
+    */
+    public static function findById($id){
+        $obj = null;
+        $results = self::find($id);
+        if (is_array($results) && count($results) == 1)
+            $obj = $results[0];
+
+        return $obj;
+
     }
 
     /**
@@ -240,6 +313,10 @@ class Publicacion extends Model{
         return $results;
     }
 
+    public function toArray(){
+        return self::mappingToArray($this);
+    }
+
 
     /**
      * Method to mapping the object to array
@@ -248,7 +325,7 @@ class Publicacion extends Model{
         $result = [];
 
         $result['id']               = $publicacion->getId();
-        $result['description']      = $publicacion->getDescription();
+        $result['description']      = $publicacion->getDescripcion();
         $result['date']             = $publicacion->getFecha();
         $result['journal']          = [];
         $result['journal']['id']    = $publicacion->getRevista()->getId();

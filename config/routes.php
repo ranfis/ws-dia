@@ -66,6 +66,15 @@ class Routes{
     //GET
     const FUND_LIST             = "/fund/list";
 
+    //POST
+    const PUBLICATION_ADD       = "/publication/add";
+    //PUT
+    const PUBLICATION_UPDATE    = "/publication/update";
+    //PUT
+    const PUBLICATION_DELETE    = "/publication/del";
+    //GET
+    const PUBLICATION_LIST      = "/publication/list";
+
 
     //POST
     const EXECUTING_UNIT_ADD    = "/executing_unit/add";

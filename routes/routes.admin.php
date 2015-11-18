@@ -1,6 +1,7 @@
 <?php
 require_once("models/congreso.php");
 require_once("models/participante.php");
+require_once("models/publicacion.php");
 require_once("models/revistaPublicacion.php");
 
 $app->get(\Config\Routes::CONGRESS_LIST,function() use ($app,$param){
@@ -375,5 +376,133 @@ $app->get(\Config\Routes::JOURNAL_LIST, function() use($app){
     }
 
     $ws->result = $results;
+    echo $ws->output($app);
+});
+
+function validatePublication(&$ws,&$app,&$param,$update = false){
+    $id             = isset($param['id']) ? $param['id'] : null;
+    $descripcion    = isset($param['description']) ? $param['description'] : null;
+    $fecha          = isset($param['date']) ? $param['date'] : null;
+    $revista        = isset($param['journal']) ? $param['journal'] : null;
+    $volumen        = isset($param['volume']) ? $param['volume'] : null;
+    $pagina         = isset($param['page']) ? $param['page'] : null;
+    $propiedadIntel = isset($param['has_prop_intel']) ? $param['has_prop_intel'] : null;
+    $participantes  = isset($param['participantes']) ? $param['participantes'] : null;
+
+    if ($update && ($id === null || !$id)) $ws->generate_error(01,"La publicaci&oacute;n es inv&&acute;lida");
+    else if ($descripcion === null || !$descripcion) $ws->generate_error(01,"La descripci&oacute;n de la publicaci&oacute;n es requerida");
+    else if ($fecha === null || !$fecha) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es requerida");
+    else if (!StringValidator::isDate($fecha)) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
+    else if ($revista === null || !$revista) $ws->generate_error(01,"La revista es requerida");
+    else if (!StringValidator::isInteger($revista)) $ws->generate_error(01,"La revista es inv&aacute;lida");
+    else if ($volumen === null || !$volumen) $ws->generate_error(01,"El volumen de la publicaci&oacute;n es requerido");
+    else if ($pagina === null || !$pagina) $ws->generate_error(01,"La cantidad de paginas de la publicaci&oacute;n es requerida");
+    else if ($propiedadIntel === null) $ws->generate_error(01,"Debe de indicar si la publicaci&oacute;n tiene Propiedad Intelectual o no");
+
+    else if (!$objRevista = \Model\RevistaPublicacion::findById($revista)) $ws->generate_error(01,"Revista no encontrada");
+    else if ($participantes === null || !is_array($participantes) || count($participantes) == 0) $ws->generate_error(01,"Participantes inv&aacute;lido");
+    else if ($update && (!$pub = \Model\Publicacion::findById($id))) $ws->generate_error(01,"Publicaci&oacute;n no encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return false;
+    }
+
+    //verify if any of the participans is invalid
+    foreach($participantes as $k=>$p){
+        $pos = $k+1;
+        if (!StringValidator::isInteger($p)){
+            $ws->generate_error(01,"El participante con posici&oacute;n #{$pos} es inv&aacute;lido");
+            break;
+        }
+
+        if (!\Model\Participante::findById($p)){
+            $ws->generate_error(01,"El participante con posici&oacute;n #{$pos} es inv&aacute;lido");
+            break;
+        }
+    }
+    //end: verify if any of the participans is invalid
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return false;
+    }
+
+    $pub = isset($pub) && $pub ? $pub : new \Model\Publicacion();
+    $pub->setDescripcion($descripcion);
+    $pub->setFecha($fecha);
+    $pub->setVolumen($volumen);
+    $pub->setRevista($objRevista);
+    $pub->setPagina($pagina);
+    $pub->setPropiedadIntelectual($propiedadIntel);
+
+    $parsToObject = [];
+    foreach($participantes as $parId){
+        $par = new \Model\Participante($parId);
+        $parsToObject[] = $par;
+    }
+    $pub->setParticipantes($parsToObject);
+
+    return $pub;
+}
+
+
+$app->post(\Config\Routes::PUBLICATION_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    //validate the param
+    if (!$con = validatePublication($ws,$app,$param)) return;
+    //end: validate the param
+
+    if (!$con->add()) $ws->generate_error(01,"Error agregando la publicaci&oacute;n");
+
+    echo $ws->output($app);
+});
+
+
+
+$app->put(\Config\Routes::PUBLICATION_UPDATE,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    //validate the param
+    if (!$pub = validatePublication($ws,$app,$param,true)) return;
+    //end: validate the param
+
+    if (!$pub->update()) $ws->generate_error(01,"Error actualizando la publicaci&oacute;n");
+    echo $ws->output($app);
+});
+
+$app->put(\Config\Routes::PUBLICATION_DELETE, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"La publicaci&oacute;n a eliminar es requerida");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"La publicaci&oacute;n es inv&aacute;lida");
+    else if (!$pub = \Model\Publicacion::findById($id)) $ws->generate_error(01,"La publicaci&oacute;n no fue encontrada");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$pub->delete()) $ws->generate_error(01,"No se pudo eliminar la publicaci&oacute;n, intente mas tarde");
+    echo $ws->output($app);
+});
+
+
+$app->get(\Config\Routes::PUBLICATION_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\Publicacion::find();
+
+    $publications = [];
+    foreach($results as $pat)
+        $publications[] = $pat->toArray();
+
+    $ws->result = $publications;
     echo $ws->output($app);
 });
