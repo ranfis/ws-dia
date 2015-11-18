@@ -335,14 +335,14 @@ class Publicacion extends Model{
         $result['volume']           = $publicacion->getVolumen();
         $result['pages']            = $publicacion->getPagina();
         $result['intellectual_prop']    = $publicacion->hasPropiedadIntelectual();
-        
-        $result['participante'] = [];
+
+        $result['participantes'] = [];
         foreach($publicacion->getParticipantes() as $par){
             $objPar = [];
             $objPar['id'] = $par->getId();
             $objPar['nombre'] = $par->getNombre();
             $objPar['apellido'] = $par->getApellido();
-            $result['participante'][] = $objPar;
+            $result['participantes'][] = $objPar;
         }
         return $result;
     }

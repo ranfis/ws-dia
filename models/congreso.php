@@ -247,14 +247,14 @@ class Congreso extends  \Model\Model{
         }
         $obj['fecha_creacion'] = $this->getFechaCreacion();
 
-        $obj['participante'] = [];
+        $obj['participantes'] = [];
         foreach($this->getParticipantes() as $par){
             $objPar = [];
             $objPar['id'] = $par->getId();
             $objPar['nombre'] = $par->getNombre();
             $objPar['apellido'] = $par->getApellido();
 
-            $obj['participante'][] = $objPar;
+            $obj['participantes'][] = $objPar;
         }
         return $obj;
     }
