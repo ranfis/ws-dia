@@ -380,14 +380,14 @@ $app->get(\Config\Routes::JOURNAL_LIST, function() use($app){
 });
 
 function validatePublication(&$ws,&$app,&$param,$update = false){
-    $id             = isset($param['id']) ? $param['id'] : null;
-    $descripcion    = isset($param['description']) ? $param['description'] : null;
-    $fecha          = isset($param['date']) ? $param['date'] : null;
-    $revista        = isset($param['journal']) ? $param['journal'] : null;
-    $volumen        = isset($param['volume']) ? $param['volume'] : null;
-    $pagina         = isset($param['page']) ? $param['page'] : null;
-    $propiedadIntel = isset($param['has_prop_intel']) ? $param['has_prop_intel'] : null;
-    $participantes  = isset($param['participantes']) ? $param['participantes'] : null;
+    $id             = isset($param[\Model\Publicacion::JSON_FIELD_ID]) ? $param[\Model\Publicacion::JSON_FIELD_ID] : null;
+    $descripcion    = isset($param[\Model\Publicacion::JSON_FIELD_DESCRIPTION]) ? $param[\Model\Publicacion::JSON_FIELD_DESCRIPTION] : null;
+    $fecha          = isset($param[\Model\Publicacion::JSON_FIELD_DATE]) ? $param[\Model\Publicacion::JSON_FIELD_DATE] : null;
+    $revista        = isset($param[\Model\Publicacion::JSON_FIELD_JOURNAL]) ? $param[\Model\Publicacion::JSON_FIELD_JOURNAL] : null;
+    $volumen        = isset($param[\Model\Publicacion::JSON_FIELD_VOLUME]) ? $param[\Model\Publicacion::JSON_FIELD_VOLUME] : null;
+    $pagina         = isset($param[\Model\Publicacion::JSON_FIELD_PAGES]) ? $param[\Model\Publicacion::JSON_FIELD_PAGES] : null;
+    $propiedadIntel = isset($param[\Model\Publicacion::JSON_FIELD_HAS_INTELLECTUAL_PROP]) ? $param[\Model\Publicacion::JSON_FIELD_HAS_INTELLECTUAL_PROP] : null;
+    $participantes  = isset($param[\Model\Publicacion::JSON_FIELD_PARTICIPANTS]) ? $param[\Model\Publicacion::JSON_FIELD_PARTICIPANTS] : null;
 
     if ($update && ($id === null || !$id)) $ws->generate_error(01,"La publicaci&oacute;n es inv&&acute;lida");
     else if ($descripcion === null || !$descripcion) $ws->generate_error(01,"La descripci&oacute;n de la publicaci&oacute;n es requerida");
