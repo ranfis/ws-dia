@@ -342,7 +342,7 @@ class Publicacion extends Model{
         $result[self::JSON_FIELD_DATE]             = $publicacion->getFecha();
         $result[self::JSON_FIELD_JOURNAL]          = [];
         $result[self::JSON_FIELD_JOURNAL]['id']    = $publicacion->getRevista()->getId();
-        $result[self::JSON_FIELD_JOURNAL]['name']    = $publicacion->getRevista()->getDescripcion();
+        $result[self::JSON_FIELD_JOURNAL]['description']    = $publicacion->getRevista()->getDescripcion();
         $result[self::JSON_FIELD_VOLUME]           = $publicacion->getVolumen();
         $result[self::JSON_FIELD_PAGES]            = $publicacion->getPagina();
         $result[self::JSON_FIELD_HAS_INTELLECTUAL_PROP]    = $publicacion->hasPropiedadIntelectual();
