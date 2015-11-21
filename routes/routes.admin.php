@@ -3,6 +3,14 @@ require_once("models/congreso.php");
 require_once("models/participante.php");
 require_once("models/publicacion.php");
 require_once("models/revistaPublicacion.php");
+require_once("models/fondo.php");
+
+
+$app->options('/(:name+)', function() use ($app) {
+    $app->response()->header('Access-Control-Allow-Origin','*');
+    $app->response()->header('Access-Control-Allow-Methods','PUT');
+    $app->response()->header('Access-Control-Allow-Headers', 'X-Requested-With, X-authentication, X-client');
+});
 
 $app->get(\Config\Routes::CONGRESS_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
@@ -83,11 +91,7 @@ function validateCongress(&$ws,&$app,&$param,$update = false){
     return $con;
 }
 
-$app->options('/(:name+)', function() use ($app) {
-    $app->response()->header('Access-Control-Allow-Origin','*');
-    $app->response()->header('Access-Control-Allow-Methods','PUT');
-    $app->response()->header('Access-Control-Allow-Headers', 'X-Requested-With, X-authentication, X-client');
-});
+
 
 $app->post(\Config\Routes::CONGRESS_ADD,function() use($app,$param){
     $ws = new \Core\Webservice();
@@ -134,7 +138,6 @@ $app->put(\Config\Routes::CONGRESS_DEL, function() use($app,$param){
     if (!$congress->delete()) $ws->generate_error(01,"No se pudo eliminar el congreo, intente mas tarde");
     echo $ws->output($app);
 });
-
 
 $app->get(\Config\Routes::SPONSOR_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
@@ -506,3 +509,87 @@ $app->get(\Config\Routes::PUBLICATION_LIST,function() use ($app,$param){
     $ws->result = $publications;
     echo $ws->output($app);
 });
+
+
+$app->get(\Config\Routes::FUND_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\Fondo::find();
+
+    $funds = [];
+    foreach($results as $fund)
+        $funds[] = $fund->toArray();
+
+    $ws->result = $funds;
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::FUND_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : $param;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $name = isset($param['name']) ? $param['name'] : null;
+
+
+    if ($name === null || !$name) $ws->generate_error(01,"El nombre del fondo es requerido");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $fund = new \Model\Fondo();
+    $fund->setDescripcion($name);
+
+    if (!$fund->add()) $ws->generate_error(01,"Error agregando el fondo, intente nuevamente");
+
+    echo $ws->output($app);
+});
+
+
+$app->put(\Config\Routes::FUND_UPDATE,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+    $name = isset($param['name']) ? $param['name'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El id del fondo es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"Id del fondo invalido");
+    else if ($name === null || !$name) $ws->generate_error(01,"El nombre del fondo es requerido");
+    else if (!$fund = \Model\Fondo::findById($id)) $ws->generate_error(01,"Fondo no encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $fund->setDescripcion($name);
+
+    if (!$fund->update()) $ws->generate_error(01,"Error actualizando el fondo");
+
+    echo $ws->output($app);
+});
+
+$app->put(\Config\Routes::FUND_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El fondo a eliminar es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El fondo es inv&aacute;lido");
+    else if (!$sponsor = \Model\Patrocinio::findById($id)) $ws->generate_error(01,"El fondo no fue encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$sponsor->delete()) $ws->generate_error(01,"No se pudo eliminar el fondo, intente mas tarde");
+    echo $ws->output($app);
+});
+
+

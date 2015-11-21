@@ -96,7 +96,7 @@ class Fondo extends Model{
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
 
-        $query = "UPDATE fondo SET status=? WHERE id_fondo=?";
+        $query = "UPDATE fondo SET estatus=? WHERE id_fondo=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("ii",$this->estatus->getId(),$this->id);
@@ -107,22 +107,37 @@ class Fondo extends Model{
 
 
     /**
-     * Method to find the revista publicacion
+     * Method to find the fund by id
+    */
+    public static function findById($id){
+        $fund = null;
+
+        $results = self::find($id);
+        if (is_array($results) && count($results) == 1)
+            $fund = $results[0];
+        return $fund;
+    }
+
+
+    /**
+     * Method to find the journal article
     */
     public static function find($id = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
-        $query.= " WHERE ESTATUS != " . Estatus::ESTATUS_REMOVED;
+        $query.= " WHERE estatus != " . Estatus::ESTATUS_REMOVED;
         if ($id) $query .=" AND id_fondo=?";
 
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return $results;
+
         if ($id) $result->bind_param("i",$id);
         if (!self::$dbManager->executeSql($result)) return $results;
 
         $results = self::mappingFromDBResult($result);
+
         return $results;
     }
 
@@ -143,15 +158,14 @@ class Fondo extends Model{
         return $results;
     }
 
-
     /**
      * Method to mapping the object to array
-    */
-    public static function mappingToArray(&$fondo){
+     */
+    public function toArray(){
         $result = [];
 
-        $result['id']           = $fondo->getId();
-        $result['description']  = $fondo->getDescription();
+        $result['id']    = $this->getId();
+        $result['name']  = $this->getDescripcion();
 
         return $result;
     }
