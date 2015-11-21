@@ -582,13 +582,13 @@ $app->put(\Config\Routes::FUND_DEL, function() use($app,$param){
 
     if ($id === null || !$id) $ws->generate_error(01,"El fondo a eliminar es requerido");
     else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El fondo es inv&aacute;lido");
-    else if (!$sponsor = \Model\Patrocinio::findById($id)) $ws->generate_error(01,"El fondo no fue encontrado");
+    else if (!$fund = \Model\Fondo::findById($id)) $ws->generate_error(01,"El fondo no fue encontrado");
 
     if ($ws->error){
         echo $ws->output($app);
         return;
     }
-    if (!$sponsor->delete()) $ws->generate_error(01,"No se pudo eliminar el fondo, intente mas tarde");
+    if (!$fund->delete()) $ws->generate_error(01,"No se pudo eliminar el fondo, intente mas tarde");
     echo $ws->output($app);
 });
 
