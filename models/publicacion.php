@@ -17,7 +17,7 @@ class Publicacion extends Model{
     const JSON_FIELD_PAGES  = "pages";
     const JSON_FIELD_HAS_INTELLECTUAL_PROP = "has_intellectual_prop";
     const JSON_FIELD_PARTICIPANTS = "participantes";
-    
+
     const QUERY_FIND = "SELECT p.id_publicacion, p.descripcion, p.fecha, p.id_revista_publicacion, rp.descripcion 'revista_publicacion', p.volumen, p.pagina, p.propiedad_intelectual, p.estatus FROM publicacion p inner join revista_publicacion rp on p.id_revista_publicacion = rp.id_revista_publicacion";
 
     private $id;
@@ -245,7 +245,30 @@ class Publicacion extends Model{
         if (!$result = self::$dbManager->query($query)) return null;
         $result->bind_param("ssisssii",$this->getDescripcion(),$this->getFecha(),$this->getRevista()->getId(),$this->getVolumen(),$this->getPagina(),$this->hasPropiedadIntelectual(),$this->getEstatus()->getId(),$this->getId());
         if (!self::$dbManager->executeSql($result)) return null;
-        return true;
+
+        $ret = null;
+
+        //remove all authors
+        $query = "DELETE FROM publicacion_autor WHERE publicacion_id_publicacion=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        //end: remove all authors
+
+        if ($this->persistAuthors($result)){
+            DatabaseManager::$link->commit();
+            $ret = true;
+        }
+        else
+            DatabaseManager::$link->rollback();
+        return $ret;
     }
 
 
