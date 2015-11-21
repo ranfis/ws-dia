@@ -16,9 +16,8 @@ class Publicacion extends Model{
     const JSON_FIELD_VOLUME = "volume";
     const JSON_FIELD_PAGES  = "pages";
     const JSON_FIELD_HAS_INTELLECTUAL_PROP = "has_intellectual_prop";
-    const JSON_FIELD_PARTICIPANTS = "participants";
-
-
+    const JSON_FIELD_PARTICIPANTS = "participantes";
+    
     const QUERY_FIND = "SELECT p.id_publicacion, p.descripcion, p.fecha, p.id_revista_publicacion, rp.descripcion 'revista_publicacion', p.volumen, p.pagina, p.propiedad_intelectual, p.estatus FROM publicacion p inner join revista_publicacion rp on p.id_revista_publicacion = rp.id_revista_publicacion";
 
     private $id;
@@ -347,13 +346,13 @@ class Publicacion extends Model{
         $result[self::JSON_FIELD_PAGES]            = $publicacion->getPagina();
         $result[self::JSON_FIELD_HAS_INTELLECTUAL_PROP]    = $publicacion->hasPropiedadIntelectual();
 
-        $result["participantes"] = [];
+        $result[self::JSON_FIELD_PARTICIPANTS] = [];
         foreach($publicacion->getParticipantes() as $par){
             $objPar = [];
             $objPar['id'] = $par->getId();
             $objPar['nombre'] = $par->getNombre();
             $objPar['apellido'] = $par->getApellido();
-            $result["participantes"][] = $objPar;
+            $result[self::JSON_FIELD_PARTICIPANTS][] = $objPar;
         }
         return $result;
     }
