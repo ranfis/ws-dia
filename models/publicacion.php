@@ -347,13 +347,13 @@ class Publicacion extends Model{
         $result[self::JSON_FIELD_PAGES]            = $publicacion->getPagina();
         $result[self::JSON_FIELD_HAS_INTELLECTUAL_PROP]    = $publicacion->hasPropiedadIntelectual();
 
-        $result[self::JSON_FIELD_PARTICIPANTS] = [];
+        $result["participantes"] = [];
         foreach($publicacion->getParticipantes() as $par){
             $objPar = [];
             $objPar['id'] = $par->getId();
-            $objPar['firstname'] = $par->getNombre();
-            $objPar['lastname'] = $par->getApellido();
-            $result[self::JSON_FIELD_PARTICIPANTS][] = $objPar;
+            $objPar['nombre'] = $par->getNombre();
+            $objPar['apellido'] = $par->getApellido();
+            $result["participantes"][] = $objPar;
         }
         return $result;
     }
