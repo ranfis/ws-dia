@@ -108,6 +108,7 @@ class Fondo extends Model{
 
     /**
      * Method to find the fund by id
+     * @return Fondo
     */
     public static function findById($id){
         $fund = null;

@@ -85,6 +85,17 @@ class Routes{
     //GET
     const EXECUTING_UNIT_LIST   = "/executing_unit/list";
 
+    //POST
+    const INSTITUTION_ADD    = "/institution/add";
+    //PUT
+    const INSTITUTION_UPDATE = "/institution/update";
+    //POST
+    const INSTITUTION_DEL    = "/institution/del";
+    //GET
+    const INSTITUTION_LIST   = "/institution/list";
+
+
+
 
 
 

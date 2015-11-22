@@ -4,6 +4,8 @@ require_once("models/participante.php");
 require_once("models/publicacion.php");
 require_once("models/revistaPublicacion.php");
 require_once("models/fondo.php");
+require_once("models/institucion.php");
+require_once("models/unidadEjecutora.php");
 
 
 $app->options('/(:name+)', function() use ($app) {
@@ -593,3 +595,169 @@ $app->put(\Config\Routes::FUND_DEL, function() use($app,$param){
 });
 
 
+$app->get(\Config\Routes::INSTITUTION_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\Institucion::find();
+
+    $institutions = [];
+    foreach($results as $ins)
+        $institutions[] = $ins->toArray();
+
+    $ws->result = $institutions;
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::INSTITUTION_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : $param;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $name = isset($param['name']) ? $param['name'] : null;
+
+
+    if ($name === null || !$name) $ws->generate_error(01,"El nombre de la institucion es requerido");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $ins = new \Model\Institucion();
+    $ins->setDescripcion($name);
+
+    if (!$ins->add()) $ws->generate_error(01,"Error agregando la institucion, intente nuevamente");
+
+    echo $ws->output($app);
+});
+
+
+$app->put(\Config\Routes::INSTITUTION_UPDATE,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+    $name = isset($param['name']) ? $param['name'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El id de la insituci&oacute;n es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"Id de la instituci&oacute;n invalido");
+    else if ($name === null || !$name) $ws->generate_error(01,"El nombre de la instituci&oacute;n es requerido");
+    else if (!$ins = \Model\Institucion::findById($id)) $ws->generate_error(01,"Instituci&oacute;n no encontrada");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $ins->setDescripcion($name);
+
+    if (!$ins->update()) $ws->generate_error(01,"Error actualizando la instituci&oacute;n");
+
+    echo $ws->output($app);
+});
+
+$app->put(\Config\Routes::INSTITUTION_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"La instituci&oacute;n a eliminar es requerida");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"La instituci&oacute;n es inv&aacute;lida");
+    else if (!$ins = \Model\Institucion::findById($id)) $ws->generate_error(01,"La instituci&oacute;n no fue encontrada");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$ins->delete()) $ws->generate_error(01,"No se pudo eliminar la instituci&oacute;n, intente mas tarde");
+    echo $ws->output($app);
+});
+//EXECUTING UNIT
+
+
+$app->get(\Config\Routes::EXECUTING_UNIT_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\UnidadEjecutora::find();
+
+    $units = [];
+    foreach($results as $unit)
+        $units[] = $unit->toArray();
+
+    $ws->result = $units;
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::EXECUTING_UNIT_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : $param;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $name = isset($param['name']) ? $param['name'] : null;
+
+
+    if ($name === null || !$name) $ws->generate_error(01,"El nombre de la unidad es requerido");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $unit = new \Model\UnidadEjecutora();
+    $unit->setDescripcion($name);
+
+    if (!$unit->add()) $ws->generate_error(01,"Error agregando la unidad, intente nuevamente");
+
+    echo $ws->output($app);
+});
+
+
+$app->put(\Config\Routes::EXECUTING_UNIT_UPDATE,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+    $name = isset($param['name']) ? $param['name'] : null;
+
+    $unit = null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El id de la unidad es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"Id de la unidad invalido");
+    else if ($name === null || !$name) $ws->generate_error(01,"El nombre de la unidad es requerido");
+    else if (!$unit = \Model\UnidadEjecutora::findById($id)) $ws->generate_error(01,"Unidad no encontrada");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $unit->setDescripcion($name);
+
+    if (!$unit->update()) $ws->generate_error(01,"Error actualizando la unidad");
+
+    echo $ws->output($app);
+});
+
+$app->put(\Config\Routes::EXECUTING_UNIT_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $unit = null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"La unidad a eliminar es requerida");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"La unidad es inv&aacute;lida");
+    else if (!$unit = \Model\UnidadEjecutora::findById($id)) $ws->generate_error(01,"La unidad no fue encontrada");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$unit->delete()) $ws->generate_error(01,"No se pudo eliminar la unidad, intente mas tarde");
+    echo $ws->output($app);
+});

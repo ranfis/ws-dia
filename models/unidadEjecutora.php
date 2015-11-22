@@ -77,7 +77,7 @@ class UnidadEjecutora extends Model{
         if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
-        $query = "UPDATE unida_ejecutora SET descripcion=? WHERE id_unidad_ejecutora=?";
+        $query = "UPDATE unidad_ejecutora SET descripcion=? WHERE id_unidad_ejecutora=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
         $result->bind_param("si",$this->descripcion,$this->id);
@@ -96,7 +96,7 @@ class UnidadEjecutora extends Model{
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
 
-        $query = "UPDATE unidad_ejecutora SET status=? WHERE id_unidad_ejecutora=?";
+        $query = "UPDATE unidad_ejecutora SET estatus=? WHERE id_unidad_ejecutora=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("ii",$this->estatus->getId(),$this->id);
@@ -105,15 +105,28 @@ class UnidadEjecutora extends Model{
         return true;
     }
 
+    /**
+     * Method to find the unit by id
+     * @param id integer: id
+     * @return UnidadEjecutora
+    */
+    public static function findById($id){
+        $unit = null;
+        $results = self::find($id);
+        if (is_array($results) && count($results) == 1)
+            $unit = $results[0];
+        return $unit;
+    }
 
     /**
      * Method to find the revista publicacion
+     * @return
     */
     public static function find($id = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
-        $query.= " WHERE ESTATUS != " . Estatus::ESTATUS_REMOVED;
+        $query.= " WHERE estatus != " . Estatus::ESTATUS_REMOVED;
         if ($id) $query .=" AND id_unidad_ejecutora=?";
 
         $query = self::formatQuery($query);
@@ -146,12 +159,13 @@ class UnidadEjecutora extends Model{
 
     /**
      * Method to mapping the object to array
+     * @return \ArrayObject
     */
-    public static function mappingToArray(&$unidad){
+    public function toArray(){
         $result = [];
 
-        $result['id']           = $unidad->getId();
-        $result['description']  = $unidad->getDescription();
+        $result['id']           = $this->getId();
+        $result['description']  = $this->getDescripcion();
 
         return $result;
     }

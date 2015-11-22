@@ -95,7 +95,7 @@ class Institucion extends Model{
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
 
-        $query = "UPDATE institucion SET status=? WHERE id_institucion=?";
+        $query = "UPDATE institucion SET estatus=? WHERE id_institucion=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return false;
         $result->bind_param("ii",$this->estatus->getId(),$this->id);
@@ -104,15 +104,26 @@ class Institucion extends Model{
         return true;
     }
 
+    /**
+     * Method to find the institution
+    */
+    public static function findById($id){
+        $ins = null;
+        $results = self::find($id);
+        if (is_array($results) && count($results) == 1)
+            $ins = $results[0];
+
+        return $ins;
+    }
 
     /**
-     * Method to find the revista publicacion
+     * Method to find the institution
     */
     public static function find($id = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
-        $query.= " WHERE ESTATUS != " . Estatus::ESTATUS_REMOVED;
+        $query.= " WHERE estatus != " . Estatus::ESTATUS_REMOVED;
         if ($id) $query .=" AND id_institucion=?";
 
         $query = self::formatQuery($query);
@@ -146,11 +157,11 @@ class Institucion extends Model{
     /**
      * Method to mapping the object to array
     */
-    public static function mappingToArray(&$institucion){
+    public function toArray(){
         $result = [];
 
-        $result['id']           = $institucion->getId();
-        $result['description']  = $institucion->getDescription();
+        $result['id']           = $this->getId();
+        $result['description']  = $this->getDescripcion();
 
         return $result;
     }
