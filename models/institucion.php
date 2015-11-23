@@ -161,7 +161,7 @@ class Institucion extends Model{
         $result = [];
 
         $result['id']           = $this->getId();
-        $result['description']  = $this->getDescripcion();
+        $result['name']  = $this->getDescripcion();
 
         return $result;
     }
