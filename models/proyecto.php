@@ -4,14 +4,14 @@ namespace  Model;
 require_once("models/model.php");
 require_once("models/estadoActual.php");
 require_once("models/estatusAplicacion.php");
-require_once("models/fondoProyecto.php");
+require_once("models/fondo.php");
 require_once("models/institucionProyecto.php");
 require_once("models/unidadEjecutoraProyecto.php");
 
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "";
+    const QUERY_FIND = "SELECT id_proyecto, descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, estatus, creador, fecha_creacion FROM proyecto";
 
     private $id;
     //String
@@ -35,6 +35,9 @@ class Proyecto extends Model{
 
     //String: Aporte de la institucion de donde sale la investigacion
     private $aporte;
+
+    //Moneda: moneda
+    private $moneda;
 
     //Double: Monto total del proyecto
     private $montoTotal;
@@ -428,6 +431,23 @@ class Proyecto extends Model{
     }
 
     /**
+     * @return mixed
+     */
+    public function getMoneda()
+    {
+        return $this->moneda;
+    }
+
+    /**
+     * @param mixed $moneda
+     */
+    public function setMoneda($moneda)
+    {
+        $this->moneda = $moneda;
+    }
+
+
+    /**
      * Metodo para agregar el proyecto
      * @return boolean
     */
@@ -441,12 +461,8 @@ class Proyecto extends Model{
 
         DatabaseManager::$link->autocommit(FALSE);
 
-        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
+        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
         $query = self::formatQuery($query);
-        //SELECT id_proyecto, descripcion, fecha_aplicacion, fecha_inicio, asesor,
-        // id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe,
-        // monto_total, overhead_unibe, software, patente, otro_producto,
-        // investigador_id, estatus, creador, fecha_creacion FROM proyecto WHERE 1
 
         $dinParams[] = self::getBindParam("s",$this->descripcion);
         $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
@@ -456,6 +472,7 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->estatusAplicacion->getId());
         $dinParams[] = self::getBindParam("d",$this->contraPartida);
         $dinParams[] = self::getBindParam("d",$this->aporte);
+        $dinParams[] = self::getBindParam("i",$this->moneda->getId());
         $dinParams[] = self::getBindParam("d",$this->montoTotal);
         $dinParams[] = self::getBindParam("d",$this->overhead);
         $dinParams[] = self::getBindParam("i",$this->software ? 1: 0);
@@ -558,11 +575,10 @@ class Proyecto extends Model{
             return false;
         //add the participants
         foreach($this->getFondos() as $fondoProyecto){
-            $query = "INSERT INTO proyecto_has_fondo(id_proyecto, id_fondo, monto) VALUES (?,?,?)";
+            $query = "INSERT INTO proyecto_has_fondo(id_proyecto, id_fondo) VALUES (?,?)";
             $dinParams = [];
             $dinParams[] = self::getBindParam("i",$this->getId());
             $dinParams[] = self::getBindParam("i",$fondoProyecto->getId());
-            $dinParams[] = self::getBindParam("d",$fondoProyecto->getMonto());
 
             $query = self::formatQuery($query);
             if (!$result = self::$dbManager->query($query))

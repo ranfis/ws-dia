@@ -94,6 +94,9 @@ class Routes{
     //GET
     const INSTITUTION_LIST   = "/institution/list";
 
+    //GET
+    const CURRENCY_GET       = "/currency/get";
+
     //POST
     const PROJECT_ADD        = "/project/add";
     //PUT

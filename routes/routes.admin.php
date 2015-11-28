@@ -7,6 +7,7 @@ require_once("models/fondo.php");
 require_once("models/institucion.php");
 require_once("models/unidadEjecutora.php");
 require_once("models/proyecto.php");
+require_once("models/moneda.php");
 
 
 $app->options('/(:name+)', function() use ($app) {
@@ -763,6 +764,24 @@ $app->put(\Config\Routes::EXECUTING_UNIT_DEL, function() use($app,$param){
     echo $ws->output($app);
 });
 
+
+$app->get(\Config\Routes::CURRENCY_GET, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : [];
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+
+    $currencies = \Model\Moneda::find();
+
+    $results = [];
+    foreach($currencies as $currency){
+        $results[] = $currency->toArray();
+    }
+    $ws->result = $results;
+    echo $ws->output($app);
+});
+
+
+
 /*
 //POST
 const PROJECT_ADD        = "/project/add";
@@ -785,6 +804,7 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     $asesor             = isset($param['adviser']) ? $param['adviser'] : null;
     $contrapartida      = isset($param['counterpart']) ? $param['counterpart'] : null;
     $aporte             = isset($param['input']) ? $param['input'] : null;
+    $moneda             = isset($param['currency']) ? $param['currency'] : null;
     $montoTotal         = isset($param['total_amount']) ? $param['total_amount'] : null;
     $overhead           = isset($param['overhead']) ? $param['overhead'] : null;
     $software           = isset($param['software']) ? $param['software'] : null;
@@ -806,6 +826,9 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     else if ($asesor === null || !$asesor) $ws->generate_error(01,"El asesor es requerido");
     else if ($contrapartida === null || !$contrapartida) $ws->generate_error(01,"La contrapartida es requerida");
     else if ($aporte === null || !$aporte) $ws->generate_error(01,"El aporte es requerido");
+    else if ($moneda === null || !$moneda) $ws->generate_error(01,"La moneda es requerida");
+    else if (!StringValidator::isInteger($moneda)) $ws->generate_error(01,"La moneda es inv&aacute;lida");
+    else if (!$moneda = \Model\Moneda::findById($moneda)) $ws->generate_error(01,"Moneda no encontrada");
     else if ($montoTotal === null || !$montoTotal) $ws->generate_error(01,"El monto total es requerido");
     else if ($overhead === null || !$overhead) $ws->generate_error(01,"El overhead es requerido");
     else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
@@ -813,7 +836,6 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     else if ($investigador === null || !$investigador) $ws->generate_error(01,"El investigador es requerido");
     else if (!StringValidator::isInteger($investigador)) $ws->generate_error(01,"El investigador es inv&aacute;lido");
     else if (!$investigador = \Model\Participante::findById($investigador)) $ws->generate_error("01","Investigador no encontrado");
-
 
     if ($ws->error){
         echo $ws->output($app);
@@ -836,6 +858,7 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     $proyecto->setAporte($aporte);
     $proyecto->setMontoTotal($montoTotal);
     $proyecto->setOverhead($overhead);
+    $proyecto->setMoneda($moneda);
     $proyecto->setSoftware($software ? true : false);
     $proyecto->setPatente($patente ? true : false);
     $proyecto->setInvestigador($investigador);
