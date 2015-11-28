@@ -6,6 +6,7 @@ require_once("models/revistaPublicacion.php");
 require_once("models/fondo.php");
 require_once("models/institucion.php");
 require_once("models/unidadEjecutora.php");
+require_once("models/proyecto.php");
 
 
 $app->options('/(:name+)', function() use ($app) {
@@ -761,3 +762,91 @@ $app->put(\Config\Routes::EXECUTING_UNIT_DEL, function() use($app,$param){
     if (!$unit->delete()) $ws->generate_error(01,"No se pudo eliminar la unidad, intente mas tarde");
     echo $ws->output($app);
 });
+
+/*
+//POST
+const PROJECT_ADD        = "/project/add";
+//PUT
+const PROJECT_UPDATE     = "/project/update";
+//PUT
+const PROJECT_DEL        = "/project/del";
+//GET
+const PROJECT_LIST       = "/project/list";
+*/
+
+$app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $unit = null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $descripcion        = isset($param['description']) ? $param['description'] : null;
+    $fechaAplicacion    = isset($param['date_application']) ? $param['date_application'] : null;
+    $fechaInicio        = isset($param['date_start']) ? $param['date_start'] : null;
+    $asesor             = isset($param['adviser']) ? $param['adviser'] : null;
+    $contrapartida      = isset($param['counterpart']) ? $param['counterpart'] : null;
+    $aporte             = isset($param['input']) ? $param['input'] : null;
+    $montoTotal         = isset($param['total_amount']) ? $param['total_amount'] : null;
+    $overhead           = isset($param['overhead']) ? $param['overhead'] : null;
+    $software           = isset($param['software']) ? $param['software'] : null;
+    $patente            = isset($param['patent']) ? $param['patent'] : null;
+    $otroProducto       = isset($param['other_product']) ? $param['other_product'] : null;
+    $investigador       = isset($param['researcher']) ? $param['researcher'] : null;
+
+    //TODO: finish
+    $instituciones      = isset($param['institutions']) ? $param['institutions'] : null;
+    $unidadesEjecutora  = isset($param['executing_units']) ? $param['executing_units'] : null;
+    $coInvestigadores   = isset($param['co_researchers']) ? $param['co_researchers'] : null;
+    $fondos             = isset($param['funds']) ? $param['funds'] : null;
+
+    if ($descripcion === null || !$descripcion) $ws->generate_error(01,"La descripcion es requerida");
+    else if ($fechaAplicacion === null || !$fechaAplicacion) $ws->generate_error(01,"La fecha de aplicaci&oacute;n del proyecto es requerida");
+    else if (!StringValidator::isDate($fechaAplicacion)) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
+    else if ($fechaInicio === null || !$fechaInicio) $ws->generate_error(01,"La fecha de inicio del proyecto es requerida");
+    else if (!StringValidator::isDate($fechaInicio)) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
+    else if ($asesor === null || !$asesor) $ws->generate_error(01,"El asesor es requerido");
+    else if ($contrapartida === null || !$contrapartida) $ws->generate_error(01,"La contrapartida es requerida");
+    else if ($aporte === null || !$aporte) $ws->generate_error(01,"El aporte es requerido");
+    else if ($montoTotal === null || !$montoTotal) $ws->generate_error(01,"El monto total es requerido");
+    else if ($overhead === null || !$overhead) $ws->generate_error(01,"El overhead es requerido");
+    else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
+    else if ($patente === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene patente");
+    else if ($investigador === null || !$investigador) $ws->generate_error(01,"El investigador es requerido");
+    else if (!StringValidator::isInteger($investigador)) $ws->generate_error(01,"El investigador es inv&aacute;lido");
+    else if (!$investigador = \Model\Participante::findById($investigador)) $ws->generate_error("01","Investigador no encontrado");
+
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $proyecto = new \Model\Proyecto();
+    $proyecto->setDescripcion($descripcion);
+    $proyecto->setFechaAplicacion($fechaAplicacion);
+    $proyecto->setFechaInicio($fechaInicio);
+    $proyecto->setAsesor($asesor);
+
+    $estatusActual = new \Model\EstadoActual(\Model\EstadoActual::ESTADO_ACTUAL_NO_FINALIZADO);
+    $proyecto->setEstatusActual($estatusActual);
+
+    $estatusAplicacion = new \Model\EstatusAplicacion(\Model\EstatusAplicacion::ESTATUS_APP_EN_REVISION);
+    $proyecto->setEstatusAplicacion($estatusAplicacion);
+
+    $proyecto->setContraPartida($contrapartida);
+    $proyecto->setAporte($aporte);
+    $proyecto->setMontoTotal($montoTotal);
+    $proyecto->setOverhead($overhead);
+    $proyecto->setSoftware($software ? true : false);
+    $proyecto->setPatente($patente ? true : false);
+    $proyecto->setInvestigador($investigador);
+
+
+    $creador = \Core\SessionManager::getSession()->user;
+    $proyecto->setCreador($creador);
+
+    if (!$proyecto->add())
+        $ws->generate_error(01,"Error agregando el proyecto");
+
+    echo $ws->output($app);
+});
+

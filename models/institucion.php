@@ -44,6 +44,23 @@ class Institucion extends Model{
         $this->descripcion = $descripcion;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getEstatus()
+    {
+        return $this->estatus;
+    }
+
+    /**
+     * @param mixed $estatus
+     */
+    public function setEstatus($estatus)
+    {
+        $this->estatus = $estatus;
+    }
+
+
     public function __construct($id = null,$descripcion = null)
     {
         $this->id = $id;

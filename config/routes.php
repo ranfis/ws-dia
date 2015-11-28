@@ -89,10 +89,19 @@ class Routes{
     const INSTITUTION_ADD    = "/institution/add";
     //PUT
     const INSTITUTION_UPDATE = "/institution/update";
-    //POST
+    //PUT
     const INSTITUTION_DEL    = "/institution/del";
     //GET
     const INSTITUTION_LIST   = "/institution/list";
+
+    //POST
+    const PROJECT_ADD        = "/project/add";
+    //PUT
+    const PROJECT_UPDATE     = "/project/update";
+    //PUT
+    const PROJECT_DEL        = "/project/del";
+    //GET
+    const PROJECT_LIST       = "/project/list";
 
 
 
