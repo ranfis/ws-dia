@@ -840,7 +840,6 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     $proyecto->setPatente($patente ? true : false);
     $proyecto->setInvestigador($investigador);
 
-
     $creador = \Core\SessionManager::getSession()->user;
     $proyecto->setCreador($creador);
 
