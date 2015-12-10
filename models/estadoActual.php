@@ -74,6 +74,19 @@ class EstadoActual extends Model{
         $this->descripcion = $descripcion;
     }
 
+    /**
+     * Method to find the id
+    */
+    public static function findById($id){
+        $estado = null;
+
+        $results = self::find($id);
+
+        if (is_array($results) && count($results) == 1)
+            $estado = $results[0];
+        return $estado;
+    }
+
 
     public static function find($id = null){
         if (!self::connectDB()) return null;

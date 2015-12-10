@@ -73,6 +73,20 @@ class EstatusAplicacion extends Model{
         $this->descripcion = $descripcion;
     }
 
+    /**
+     * Method to find by id
+    */
+    public static function findById($id){
+        $estatus = null;
+
+        $results = self::find($id);
+
+        if (is_array($results) && count($results) == 1)
+            $estatus = $results[0];
+
+        return $estatus;
+    }
+
 
     public static function find($id = null){
         if (!self::connectDB()) return null;
