@@ -137,19 +137,30 @@ class Participante extends Model{
     /**
      * Method to find all participantes, can be filter by id
     */
-    public static function find($id = null,$pag = null){
+    public static function find($id = null,$project = null){
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
 
-        $query.= " WHERE estatus != 3";
-        if ($id) $query.= " AND ID=?";
+        $dinParams = [];
+
+        $query.= " WHERE estatus != ?";
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+
+        if ($id) {
+            $query.= " AND ID=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($project){
+            $query.= " AND ID IN (SELECT participante_id FROM proyecto_coinvestigador WHERE proyecto_id_proyecto=?)";
+            $dinParams[] = self::getBindParam("i",$project);
+        }
 
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return null;
 
-        if ($id)
-            $result->bind_param("i",$id);
+        self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return null;
 
         $results = self::mappingFromDBResult($result);
@@ -188,6 +199,14 @@ class Participante extends Model{
         return $results;
     }
 
+    public function toArray(){
+        $p = [];
+        $p['id'] = $this->id;
+        $p['nombre'] = $this->nombre;
+        if ($this->apellido) $p['apellido'] = $this->apellido;
+        return $p;
+    }
+
     /**
      * Method to mapping the list with participante objects
      *
@@ -196,11 +215,8 @@ class Participante extends Model{
         $results = [];
         $participantes = is_array($participantes) ? $participantes : [];
         foreach($participantes as $loopPar){
-            $p = [];
-            $p['id'] = $loopPar->id;
             $p['nombre'] = $loopPar->nombre;
-            $p['apellido'] = $loopPar->apellido;
-            $results[] = $p;
+            $results[] = $loopPar->toArray();
         }
         return $results;
     }

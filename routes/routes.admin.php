@@ -780,24 +780,8 @@ $app->get(\Config\Routes::CURRENCY_GET, function() use($app,$param){
     echo $ws->output($app);
 });
 
-
-
-/*
-//POST
-const PROJECT_ADD        = "/project/add";
-//PUT
-const PROJECT_UPDATE     = "/project/update";
-//PUT
-const PROJECT_DEL        = "/project/del";
-//GET
-const PROJECT_LIST       = "/project/list";
-*/
-
-$app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
-    $ws = new \Core\Webservice();
-    $unit = null;
-    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
-
+function validateProject(&$ws,&$app,&$param,$update = false){
+    $id                 = isset($param['id']) ? $param['id'] : null;
     $descripcion        = isset($param['description']) ? $param['description'] : null;
     $fechaAplicacion    = isset($param['date_application']) ? $param['date_application'] : null;
     $fechaInicio        = isset($param['date_start']) ? $param['date_start'] : null;
@@ -812,37 +796,134 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     $otroProducto       = isset($param['other_product']) ? $param['other_product'] : null;
     $investigador       = isset($param['researcher']) ? $param['researcher'] : null;
 
-    //TODO: finish
     $instituciones      = isset($param['institutions']) ? $param['institutions'] : null;
     $unidadesEjecutora  = isset($param['executing_units']) ? $param['executing_units'] : null;
     $coInvestigadores   = isset($param['co_researchers']) ? $param['co_researchers'] : null;
     $fondos             = isset($param['funds']) ? $param['funds'] : null;
 
+    //Nombre, año inicio, año final, Investigador principal y el estado de aplicación
+    if ($update && ($id === null || !$id)) $ws->generate_error(01,"El id del proyecto es requerido");
     if ($descripcion === null || !$descripcion) $ws->generate_error(01,"La descripcion es requerida");
     else if ($fechaAplicacion === null || !$fechaAplicacion) $ws->generate_error(01,"La fecha de aplicaci&oacute;n del proyecto es requerida");
     else if (!StringValidator::isDate($fechaAplicacion)) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
     else if ($fechaInicio === null || !$fechaInicio) $ws->generate_error(01,"La fecha de inicio del proyecto es requerida");
     else if (!StringValidator::isDate($fechaInicio)) $ws->generate_error(01,"La fecha de la publicaci&oacute;n es inv&aacute;lida, el formato debe ser: YYYY-MM-DD. Ejemplo: 2015-10-25");
-    else if ($asesor === null || !$asesor) $ws->generate_error(01,"El asesor es requerido");
-    else if ($contrapartida === null || !$contrapartida) $ws->generate_error(01,"La contrapartida es requerida");
-    else if ($aporte === null || !$aporte) $ws->generate_error(01,"El aporte es requerido");
-    else if ($moneda === null || !$moneda) $ws->generate_error(01,"La moneda es requerida");
-    else if (!StringValidator::isInteger($moneda)) $ws->generate_error(01,"La moneda es inv&aacute;lida");
-    else if (!$moneda = \Model\Moneda::findById($moneda)) $ws->generate_error(01,"Moneda no encontrada");
-    else if ($montoTotal === null || !$montoTotal) $ws->generate_error(01,"El monto total es requerido");
-    else if ($overhead === null || !$overhead) $ws->generate_error(01,"El overhead es requerido");
-    else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
-    else if ($patente === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene patente");
+    else if ($asesor && !StringValidator::isInteger($asesor)) $ws->generate_error(01,"Asesor invalido");
+    //else if ($contrapartida === null || !$contrapartida) $ws->generate_error(01,"La contrapartida es requerida");
+    //else if ($aporte === null || !$aporte) $ws->generate_error(01,"El aporte es requerido");
+    else if ($moneda && !StringValidator::isInteger($moneda)) $ws->generate_error(01,"La moneda es inv&aacute;lida");
+    else if ($moneda && !$moneda = \Model\Moneda::findById($moneda)) $ws->generate_error(01,"Moneda no encontrada");
+    //else if ($montoTotal === null || !$montoTotal) $ws->generate_error(01,"El monto total es requerido");
+    //else if ($overhead === null || !$overhead) $ws->generate_error(01,"El overhead es requerido");
+    //else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
+    //else if ($patente === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene patente");
     else if ($investigador === null || !$investigador) $ws->generate_error(01,"El investigador es requerido");
     else if (!StringValidator::isInteger($investigador)) $ws->generate_error(01,"El investigador es inv&aacute;lido");
+    else if ($asesor && !$asesor = \Model\Participante::findById($asesor)) $ws->generate_error("01","Asesor no encontrado");
     else if (!$investigador = \Model\Participante::findById($investigador)) $ws->generate_error("01","Investigador no encontrado");
+    else if ($coInvestigadores && (!is_array($coInvestigadores) || count($coInvestigadores) == 0)) $ws->generate_error(01,"Co Investigadores inv&aacute;lido");
+    else if ($fondos && (!is_array($fondos) || count($fondos) == 0)) $ws->generate_error(01,"Los fondos son inv&aacute;lidos");
+    else if ($unidadesEjecutora && (!is_array($unidadesEjecutora) || count($unidadesEjecutora) == 0)) $ws->generate_error(01,"Las unidades ejecutoras son inv&aacute;lidos");
+    else if ($instituciones && (!is_array($instituciones) || count($instituciones) == 0)) $ws->generate_error(01,"Las instituciones son inv&aacute;lidos");
 
     if ($ws->error){
         echo $ws->output($app);
         return;
     }
 
+    $tmpCoInvestigadores = $tmpFondos = $tmpInstituciones = $tmpUnidadesEjecutora  = [];
+
+    //verify if any of the co researchers is invalid
+    foreach($coInvestigadores as $k=>$p){
+        $pos = $k+1;
+        if (!StringValidator::isInteger($p)){
+            $ws->generate_error(01,"El co-investigador con posici&oacute;n #{$pos} es inv&aacute;lido");
+            break;
+        }
+
+        if (!$tmpCoInvestigadores[$k] = \Model\Participante::findById($p)){
+            $ws->generate_error(01,"El co-investigador con posici&oacute;n #{$pos} no fue encontrado");
+            break;
+        }
+    }
+    $coInvestigadores = $tmpCoInvestigadores;
+    //end: verify if any of the co researchers is invalid
+
+    if (!$ws->error)
+        //verify if any of the funds is invalid
+        foreach($fondos as $k=>$p){
+            $pos = $k+1;
+            if (!StringValidator::isInteger($p)){
+                $ws->generate_error(01,"El fondo con posici&oacute;n #{$pos} es inv&aacute;lido");
+                break;
+            }
+
+            if (!$tmpFondos[$k] = \Model\Fondo::findById($p)){
+                $ws->generate_error(01,"El fondo con posici&oacute;n #{$pos} no fue encontrado");
+                break;
+            }
+        }
+    $fondos = $tmpFondos;
+    //end: verify if any of the funds is invalid
+
+    if (!$ws->error)
+        //verify if any of the institutions is invalid
+        foreach($instituciones as $k=>$p){
+            $pos = $k+1;
+            $ins = is_array($p) ? $p: [];
+            $ins['id'] = isset($ins['id']) ? $ins['id'] : null;
+            $ins['principal'] = isset($ins['principal']) && $ins['principal'];
+
+            if (!isset($ins['id']) && !StringValidator::isInteger($ins['id'])){
+                $ws->generate_error(01,"La instituci&oacute;n con posici&oacute;n #{$pos} es inv&aacute;lido");
+                break;
+            }
+
+            if (!$tmpInstituciones[$k] = \Model\InstitucionProyecto::findById($ins['id'])){
+                $ws->generate_error(01,"La instituci&oacute;n con posici&oacute;n #{$pos} no fue encontrado");
+                break;
+            }else{
+                $tmpInstituciones[$k]->setPrincipal($ins['principal']);
+            }
+        }
+    //end: verify if any of the institutions is invalid
+    $instituciones = $tmpInstituciones ;
+
+    if (!$ws->error)
+        //verify if any of the unit is invalid
+        foreach($unidadesEjecutora as $k=>$p){
+            $pos = $k+1;
+            $unit = is_array($p) ? $p: [];
+            $unit['id'] = isset($unit['id']) ? $unit['id'] : null;
+            $unit['executing_unit'] = isset($unit['executing_unit']) && $unit['executing_unit'];
+            $unit['superviser_unit'] = isset($unit['superviser_unit']) && $unit['superviser_unit'];
+
+            if (!isset($unit['id']) && !StringValidator::isInteger($unit['id'])){
+                $ws->generate_error(01,"La unidad con posici&oacute;n #{$pos} es inv&aacute;lido");
+                break;
+            }
+
+            if (!$tmpUnidadesEjecutora[$k] = \Model\UnidadEjecutoraProyecto::findById($unit['id'])){
+                $ws->generate_error(01,"La unidad con posici&oacute;n #{$pos} no fue encontrado");
+                break;
+            }else{
+                $tmpUnidadesEjecutora[$k]->setUnidadEjecutora($unit['executing_unit']);
+                $tmpUnidadesEjecutora[$k]->setUnidadSupervisora($unit['superviser_unit']);
+            }
+        }
+    $unidadesEjecutora = $tmpUnidadesEjecutora;
+    //end: verify if any of the unit is invalid
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $tmpCoInvestigadores = $tmpFondos = $tmpInstituciones = $tmpUnidadesEjecutora  = null;
+
     $proyecto = new \Model\Proyecto();
+
+    if ($update) $proyecto->setId($id);
     $proyecto->setDescripcion($descripcion);
     $proyecto->setFechaAplicacion($fechaAplicacion);
     $proyecto->setFechaInicio($fechaInicio);
@@ -859,16 +940,111 @@ $app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
     $proyecto->setMontoTotal($montoTotal);
     $proyecto->setOverhead($overhead);
     $proyecto->setMoneda($moneda);
+    $proyecto->setOtroProducto($otroProducto);
     $proyecto->setSoftware($software ? true : false);
     $proyecto->setPatente($patente ? true : false);
     $proyecto->setInvestigador($investigador);
 
+    $proyecto->setCoInvestigadores($coInvestigadores);
+    $proyecto->setFondos($fondos);
+    $proyecto->setInstituciones($instituciones);
+    $proyecto->setUnidadesEjecutora($unidadesEjecutora);
+
     $creador = \Core\SessionManager::getSession()->user;
     $proyecto->setCreador($creador);
 
+    return $proyecto;
+}
+
+$app->post(\Config\Routes::PROJECT_ADD,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $unit = null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    if (!$proyecto = validateProject($ws,$app,$param,false)){
+        return true;
+    }
     if (!$proyecto->add())
         $ws->generate_error(01,"Error agregando el proyecto");
+    echo $ws->output($app);
+});
 
+$app->put(\Config\Routes::PROJECT_UPDATE,function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $unit = null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    if (!$proyecto = validateProject($ws,$app,$param,true)){
+        return true;
+    }
+    if (!$proyecto->update())
+        $ws->generate_error(01,"Error actualizando el proyecto");
+    echo $ws->output($app);
+});
+
+
+$app->put(\Config\Routes::PROJECT_DEL, function() use($app,$param){
+    $ws = new \Core\Webservice();
+    $unit = null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_PUT,$param,$app)) return null;
+
+    $id = isset($param['id']) ? $param['id'] : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El proyecto a eliminar es requerido");
+    else if (!StringValidator::isInteger($id)) $ws->generate_error(01,"El proyecto a eliminar es inv&aacute;lido");
+    else if (!$pro = \Model\Proyecto::findById($id)) $ws->generate_error(01,"El proyecto no fue encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+    if (!$pro->delete()) $ws->generate_error(01,"No se pudo eliminar el proyecto, intente mas tarde");
+    echo $ws->output($app);
+});
+
+
+$app->get(\Config\Routes::PROJECT_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\Proyecto::find();
+
+    $projects = [];
+    foreach($results as $pro)
+        $projects[] = $pro->toArray();
+
+    $ws->result = $projects;
+    echo $ws->output($app);
+});
+
+
+
+$app->get(\Config\Routes::STATUS_APPLICATION_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\EstatusAplicacion::find();
+
+    $statuses = [];
+    foreach($results as $status)
+        $statuses[] = $status->toArray();
+
+    $ws->result = $statuses;
+    echo $ws->output($app);
+});
+
+
+$app->get(\Config\Routes::CURRENT_STATUS_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $results = \Model\EstadoActual::find();
+
+    $statuses = [];
+    foreach($results as $status)
+        $statuses[] = $status->toArray();
+
+    $ws->result = $statuses;
     echo $ws->output($app);
 });
 

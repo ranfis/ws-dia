@@ -30,5 +30,16 @@ class InstitucionProyecto extends Institucion{
         $this->principal = $principal;
     }
 
+    /**
+     * Method to find the institution
+     */
+    public static function findById($id){
+        $ins = parent::findById($id);
+        if ($ins){
+            $ins = new InstitucionProyecto($ins->getId(),$ins->getDescripcion());
+        }
+        return $ins;
+    }
+
 
 }

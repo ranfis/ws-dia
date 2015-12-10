@@ -123,6 +123,7 @@ class Institucion extends Model{
 
     /**
      * Method to find the institution
+     * @return Institucion
     */
     public static function findById($id){
         $ins = null;

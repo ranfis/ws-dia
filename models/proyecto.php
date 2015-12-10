@@ -11,7 +11,7 @@ require_once("models/unidadEjecutoraProyecto.php");
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "SELECT id_proyecto, descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, estatus, creador, fecha_creacion FROM proyecto";
+    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda, p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id, p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual";
 
     private $id;
     //String
@@ -21,7 +21,7 @@ class Proyecto extends Model{
     //Date
     private $fechaInicio;
 
-    //String
+    //Participante
     private $asesor;
 
     //Estatus actual del proyecto
@@ -143,7 +143,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return Participante
      */
     public function getAsesor()
     {
@@ -151,7 +151,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @param mixed $asesor
+     * @param Participante $asesor
      */
     public function setAsesor($asesor)
     {
@@ -159,7 +159,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return EstadoActual
      */
     public function getEstatusActual()
     {
@@ -175,7 +175,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return EstatusAplicacion
      */
     public function getEstatusAplicacion()
     {
@@ -303,7 +303,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return Participante
      */
     public function getInvestigador()
     {
@@ -383,7 +383,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return [FondoProyecto]
+     * @return array(Fondo)
      */
     public function getFondos()
     {
@@ -399,7 +399,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return array(UnidadEjecutoraProyecto)
      */
     public function getUnidadesEjecutora()
     {
@@ -415,7 +415,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return array(Participante)
      */
     public function getCoInvestigadores()
     {
@@ -423,7 +423,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @param mixed $coInvestigadores
+     * @param array(Participante) $coInvestigadores
      */
     public function setCoInvestigadores($coInvestigadores)
     {
@@ -431,7 +431,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @return mixed
+     * @return Moneda
      */
     public function getMoneda()
     {
@@ -439,13 +439,189 @@ class Proyecto extends Model{
     }
 
     /**
-     * @param mixed $moneda
+     * @param Moneda $moneda
      */
     public function setMoneda($moneda)
     {
         $this->moneda = $moneda;
     }
 
+
+    /**
+     * @return Proyecto
+    */
+    public static function findById($id){
+        $pro = null;
+        $results = self::find($id);
+
+        if ($results && is_array($results) && count($results) == 1)
+            $pro = $results[0];
+        return $pro;
+    }
+
+    /**
+     * Method to find the revista publicacion
+     * @return array(Proyecto)
+     */
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null){
+        if (!self::connectDB()) return null;
+        $results = [];
+        $query = self::QUERY_FIND;
+        $dinParams = [];
+        $query.= " WHERE p.estatus != ?";
+
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+        if ($id) {
+            $query .=" AND p.id_proyecto=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($estatusActual) {
+            $query .=" AND p.id_estado_actual=?";
+            $dinParams[] = self::getBindParam("i",$estatusActual);
+        }
+
+        if ($estadoAplicacion) {
+            $query .=" AND p.id_estado_aplicacion=?";
+            $dinParams[] = self::getBindParam("i",$estadoAplicacion);
+        }
+
+        $query = self::formatQuery($query);
+
+        if (!$result = self::$dbManager->query($query)) return $results;
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return $results;
+
+        $results = self::mappingFromDBResult($result);
+        return $results;
+    }
+
+
+    public static function mappingFromDBResult(&$result){
+        //id_proyecto, descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion,
+        // contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software,
+        // patente, otro_producto, investigador_id, estatus, creador, fecha_creacion
+        $bindResult = [];
+        $result->bind_result(
+            $bindResult['id'],$bindResult['description'],$bindResult['fecha_aplicacion'],
+            $bindResult['fecha_inicio'], $bindResult['asesor'],
+            $bindResult['estado_actual'],$bindResult['estado_actual_nombre'],
+            $bindResult['estado_aplicacion'],$bindResult['estado_aplicacion_nombre'],
+            $bindResult['contrapartida'],$bindResult['aporte'],
+            $bindResult['moneda'],$bindResult['monto'],$bindResult['overhead'],$bindResult['software'],
+            $bindResult['patente'],$bindResult['otro_producto'],$bindResult['investigador'],
+            $bindResult['estatus'],$bindResult['creador'],$bindResult['fecha_creacion']);
+
+        $results = [];
+        while($result->fetch()){
+            $pro = new Proyecto();
+            $pro->setId($bindResult['id']);
+            $pro->setDescripcion($bindResult['description']);
+            $pro->setFechaAplicacion($bindResult['fecha_aplicacion']);
+            $pro->setFechaInicio($bindResult['fecha_inicio']);
+
+            $asesor = new Participante($bindResult['asesor']);
+            $pro->setAsesor($asesor);
+
+            $estadoActual = new EstadoActual($bindResult['estado_actual'],$bindResult['estado_actual_nombre']);
+            $pro->setEstatusActual($estadoActual);
+
+            $estadoApl = new EstatusAplicacion($bindResult['estado_aplicacion'],$bindResult['estado_aplicacion_nombre']);
+            $pro->setEstatusAplicacion($estadoApl);
+
+            $pro->setContraPartida($bindResult['contrapartida']);
+            $pro->setAporte($bindResult['aporte']);
+
+            $moneda = new Moneda($bindResult['moneda']);
+            $pro->setMoneda($moneda);
+
+            $pro->setMontoTotal($bindResult['monto']);
+            $pro->setOverhead($bindResult['overhead']);
+            $pro->setSoftware($bindResult['software'] ? true : false);
+            $pro->setPatente($bindResult['patente'] ? true : false);
+            $pro->setOtroProducto($bindResult['otro_producto']);
+
+            $inv = new Participante($bindResult['investigador']);
+            $pro->setInvestigador($inv);
+
+            $estatus = new Estatus($bindResult['estatus']);
+            $pro->setEstatus($estatus);
+
+            $creador = new User($bindResult['creador']);
+            $pro->setCreador($creador);
+
+            $pro->setFechaCreacion($bindResult['fecha_creacion']);
+
+            //co-researchers
+            $coResearchers = Participante::find(null,$bindResult['id']);
+            $pro->setCoInvestigadores($coResearchers);
+
+            //funds
+            $funds = Fondo::find(null,$bindResult['id']);
+            $pro->setFondos($funds);
+
+            //units
+            //$units = UnidadEjecutoraProyecto::findByProject($bindResult['id']);
+            //$pro->setUnidadesEjecutora($units);
+
+            //institutions
+            //$institutions = InstitucionProyecto::findByProject($bindResult['id']);
+            //$pro->setInstituciones($institutions);
+
+            $results[] = $pro;
+        }
+        return $results;
+    }
+
+
+    /**
+     * Method to convert the object to array
+    */
+    public function toArray(){
+        $result = [];
+
+        $result['id'] = $this->getId();
+        $result['description'] = $this->getDescripcion();
+        $result['date_application'] = $this->getFechaAplicacion();
+        $result['date_start'] = $this->getFechaInicio();
+
+        $result['advisor']= [];
+        $result['advisor']['id'] = $this->getAsesor()->getId();
+
+        $result['actual_status'] = $this->getEstatusActual()->toArray();
+        $result['application_status']= $this->getEstatusAplicacion()->toArray();
+
+
+        $result['contrapartida'] = $this->getContraPartida() + 0;
+        $result['input'] = $this->getAporte();
+
+        $result['currency'] = [];
+        $result['currency']['id'] = $this->getMoneda()->getId();
+
+        $result['total_amount'] = $this->getMontoTotal() + 0;
+
+        $result['overhead'] = $this->getOverhead() + 0;
+
+        $result['software'] = $this->getSoftware();
+
+        $result['patent'] = $this->getPatente();
+
+        $result['co_researchers'] = [];
+        foreach($this->getCoInvestigadores() as $coresearcher)
+            $result['co_researchers'][] = $coresearcher->toArray();
+
+        $result['funds'] = [];
+        foreach($this->getFondos() as $fondo)
+            $result['funds'][] = $fondo->toArray();
+        return $result;
+    }
+
+
+    /**Metodo para obtener las cantiedades de los proyectos*/
+    public function getCount($estatusActual = null,$estadoAplicacion = null){
+        $results=  self::find(null,$estatusActual,$estadoAplicacion);
+        return count($results);
+    }
 
     /**
      * Metodo para agregar el proyecto
@@ -467,7 +643,7 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("s",$this->descripcion);
         $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
         $dinParams[] = self::getBindParam("s",$this->fechaInicio);
-        $dinParams[] = self::getBindParam("s",$this->asesor);
+        $dinParams[] = self::getBindParam("i",$this->asesor->getId());
         $dinParams[] = self::getBindParam("i",$this->estatusActual->getId());
         $dinParams[] = self::getBindParam("i",$this->estatusAplicacion->getId());
         $dinParams[] = self::getBindParam("d",$this->contraPartida);
@@ -481,6 +657,7 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->investigador->getId());
         $dinParams[] = self::getBindParam("i",$this->estatus->getId());
         $dinParams[] = self::getBindParam("i",$this->creador->id);
+
         if (!$result = self::$dbManager->query($query)) return null;
         self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return null;
@@ -488,9 +665,9 @@ class Proyecto extends Model{
         $ret = false;
         $error = false;
         if ($result->affected_rows > 0){
-            $ret = true;
+            $this->id = $result->insert_id;
 
-            /*if (!$this->persistInstituciones())                 $error = true;
+            if (!$this->persistInstituciones())                 $error = true;
 
             if (!$error && !$this->persistsUnidadesEjecutora()) $error = true;
 
@@ -498,7 +675,7 @@ class Proyecto extends Model{
 
             if (!$error && !$this->persistCoInvestigadores())   $error = true;
 
-            $ret = !$error;*/
+            $ret = !$error;
         }
 
         if ($ret) DatabaseManager::$link->commit();
@@ -510,7 +687,113 @@ class Proyecto extends Model{
      * Metodo para actualizar el proyecto
      * @return boolean
     */
-    public function update(){ }
+    public function update(){
+        if (!$this->getId()) return null;
+        if (!self::connectDB()) return null;
+
+        DatabaseManager::$link->autocommit(FALSE);
+
+        $dinParams=  [];
+
+        $query = "UPDATE proyecto SET descripcion=?,fecha_aplicacion=?,fecha_inicio=?,asesor=?," .
+                 "id_estado_actual=?,id_estado_aplicacion=?,contrapartida_unibe=?,aporte_unibe=?," .
+                 "moneda=?,monto_total=?,overhead_unibe=?,software=?,patente=?,otro_producto=?,investigador_id=? WHERE id_proyecto=?";
+        $dinParams[] = self::getBindParam("s",$this->descripcion);
+        $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
+        $dinParams[] = self::getBindParam("s",$this->fechaInicio);
+        $dinParams[] = self::getBindParam("i",$this->getAsesor()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getEstatusActual()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getEstatusAplicacion()->getId());
+        $dinParams[] = self::getBindParam("d",$this->contraPartida);
+        $dinParams[] = self::getBindParam("d",$this->aporte);
+        $dinParams[] = self::getBindParam("i",$this->getMoneda()->getId());
+        $dinParams[] = self::getBindParam("d",$this->getMontoTotal());
+        $dinParams[] = self::getBindParam("d",$this->getOverhead());
+        $dinParams[] = self::getBindParam("i",$this->getSoftware());
+        $dinParams[] = self::getBindParam("i",$this->getPatente());
+        $dinParams[] = self::getBindParam("s",$this->getOtroProducto());
+        $dinParams[] = self::getBindParam("i",$this->getInvestigador()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getId());
+
+        $query = self::formatQuery($query);
+
+        if (!$result = self::$dbManager->query($query)) return null;
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        $ret = false;
+
+        //remove all the institutes
+        $query = "DELETE FROM proyecto_has_institucion WHERE proyectos_id_proyecto=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        //end: remove all the institutes
+
+        //remove all the units
+        $query = "DELETE FROM proyecto_has_unidad_ejecutora WHERE proyecto_id_proyecto=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        //end: remove all the units
+
+        //remove all the funds
+        $query = "DELETE FROM proyecto_has_fondo WHERE id_proyecto=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        //end: remove all the funds
+
+        //remove all the co-researchers
+        $query = "DELETE FROM proyecto_coinvestigador WHERE proyecto_id_proyecto=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $result->bind_param("i",$this->getId());
+        if (!self::$dbManager->executeSql($result)) {
+            DatabaseManager::$link->rollback();
+            return null;
+        }
+        $error = false;
+
+        //end: remove all the co-researchers
+        if (!$this->persistInstituciones())                 $error = true;
+
+        if (!$error && !$this->persistsUnidadesEjecutora()) $error = true;
+
+        if (!$error && !$this->persistsFondos())            $error = true;
+
+        if (!$error && !$this->persistCoInvestigadores())   $error = true;
+
+        if ($error) DatabaseManager::$link->rollback();
+        else DatabaseManager::$link->commit();
+        $ret = !$error;
+
+        return $ret;
+    }
 
     /**
      * Metodo para persistir las instituciones
@@ -518,8 +801,9 @@ class Proyecto extends Model{
      */
     private function persistInstituciones(){
         if (!is_array($this->getInstituciones()) || count($this->getInstituciones()) == 0)
-            return false;
+            return true;
         //add the participants
+
         foreach($this->getInstituciones() as $ins){
             $query = "INSERT INTO proyecto_has_institucion(proyectos_id_proyecto, instituciones_id_institucion, principal) VALUES (?,?,?)";
             $dinParams = [];
@@ -531,6 +815,7 @@ class Proyecto extends Model{
             if (!$result = self::$dbManager->query($query))
                 return false;
             self::bindDinParam($result,$dinParams);
+
             if (!self::$dbManager->executeSql($result))
                 return false;
 
@@ -545,10 +830,11 @@ class Proyecto extends Model{
      */
     private function persistsUnidadesEjecutora(){
         if (!is_array($this->getUnidadesEjecutora()) || count($this->getUnidadesEjecutora()) == 0)
-            return false;
+            return true;
         //add the participants
         foreach($this->getUnidadesEjecutora() as $unidad){
             $query = "INSERT INTO proyecto_has_unidad_ejecutora(proyecto_id_proyecto, unidad_ejecutora_id_unidad_ejecutora, unidad_ejecutora, unidad_supervisora) VALUES (?,?,?,?)";
+
             $dinParams = [];
             $dinParams[] = self::getBindParam("i",$this->getId());
             $dinParams[] = self::getBindParam("i",$unidad->getId());
@@ -556,12 +842,12 @@ class Proyecto extends Model{
             $dinParams[] = self::getBindParam("i",$unidad->isUnidadSupervisora() ? 1 : 0);
 
             $query = self::formatQuery($query);
+
             if (!$result = self::$dbManager->query($query))
                 return false;
             self::bindDinParam($result,$dinParams);
             if (!self::$dbManager->executeSql($result))
                 return false;
-
         }
         return true;
     }
@@ -572,13 +858,13 @@ class Proyecto extends Model{
      */
     private function persistsFondos(){
         if (!is_array($this->getFondos()) || count($this->getFondos()) == 0)
-            return false;
-        //add the participants
-        foreach($this->getFondos() as $fondoProyecto){
+            return true;
+        //add the funds
+        foreach($this->getFondos() as $fondo){
             $query = "INSERT INTO proyecto_has_fondo(id_proyecto, id_fondo) VALUES (?,?)";
             $dinParams = [];
             $dinParams[] = self::getBindParam("i",$this->getId());
-            $dinParams[] = self::getBindParam("i",$fondoProyecto->getId());
+            $dinParams[] = self::getBindParam("i",$fondo->getId());
 
             $query = self::formatQuery($query);
             if (!$result = self::$dbManager->query($query))
@@ -586,6 +872,7 @@ class Proyecto extends Model{
             self::bindDinParam($result,$dinParams);
             if (!self::$dbManager->executeSql($result))
                 return false;
+
 
         }
         return true;
@@ -597,7 +884,7 @@ class Proyecto extends Model{
      */
     private function persistCoInvestigadores(){
         if (!is_array($this->getCoInvestigadores()) || count($this->getCoInvestigadores()) == 0)
-            return false;
+            return true;
         //add the participants
         foreach($this->getCoInvestigadores() as $co){
             $query = "INSERT INTO proyecto_coinvestigador(proyecto_id_proyecto, participante_id) VALUES (?,?)";
@@ -606,6 +893,7 @@ class Proyecto extends Model{
             $dinParams[] = self::getBindParam("i",$co->getId());
 
             $query = self::formatQuery($query);
+
             if (!$result = self::$dbManager->query($query))
                 return false;
             self::bindDinParam($result,$dinParams);
@@ -613,6 +901,27 @@ class Proyecto extends Model{
                 return false;
 
         }
+        return true;
+    }
+
+
+    /**
+     * Method to delete an object from database
+     */
+    public function delete(){
+        if (!$this->getId()) return false;
+
+        $query = "UPDATE proyecto SET estatus=? WHERE id_proyecto=?";
+        $dinParams = [];
+
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+        $dinParams[] = self::getBindParam("i",$this->getId());
+
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return false;
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return false;
+
         return true;
     }
 

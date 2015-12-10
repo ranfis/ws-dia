@@ -123,18 +123,30 @@ class Fondo extends Model{
     /**
      * Method to find the journal article
     */
-    public static function find($id = null){
+    public static function find($id = null,$project = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
-        $query.= " WHERE estatus != " . Estatus::ESTATUS_REMOVED;
-        if ($id) $query .=" AND id_fondo=?";
+
+        $dinParams = [];
+        $query.= " WHERE estatus != ?";
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+
+        if ($id) {
+            $query .=" AND id_fondo=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($project) {
+            $query .=" AND id_fondo IN (SELECT id_fondo FROM proyecto_has_fondo WHERE id_proyecto=?)";
+            $dinParams[] = self::getBindParam("i",$project);
+        }
 
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return $results;
 
-        if ($id) $result->bind_param("i",$id);
+        self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return $results;
 
         $results = self::mappingFromDBResult($result);

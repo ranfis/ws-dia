@@ -107,9 +107,10 @@ class Routes{
     const PROJECT_LIST       = "/project/list";
 
 
+    //GET
+    const STATUS_APPLICATION_LIST   = "/project/status_app/list";
 
-
-
-
+    //GET
+    const CURRENT_STATUS_LIST       = "/project/current_status/list";
 }
 
