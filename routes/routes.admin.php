@@ -31,7 +31,7 @@ $app->get(\Config\Routes::DASHBOARD, function() use ($app,$param){
         "projects_review"=>0,
         "projects_accepted"=>0,
         "participants"=>0,
-        "last_projects"=>[],
+        "last_publications"=>[],
         "last_congress"=>[]
     ];
 
@@ -45,17 +45,15 @@ $app->get(\Config\Routes::DASHBOARD, function() use ($app,$param){
     $result['projects_accepted'] = \Model\Proyecto::getCount(null,\Model\EstatusAplicacion::ESTATUS_APP_ACEPTADA);
     $result['participants'] = \Model\Participante::getCount();
 
-    $resultFounds = \Model\Proyecto::find(null,null,null,10);
-    foreach($resultFounds as $pro){
-        $result['last_projects'][] = $pro->toArray();
+    $resultFounds = \Model\Publicacion::find(null,10);
+    foreach($resultFounds as $pub){
+        $result['last_publications'][] = $pub->toArray();
     }
 
     $resultFounds = \Model\Congreso::find(null,10);
     foreach($resultFounds as $con){
         $result['last_congress'][] = $con->toArray();
     }
-
-
 
     $ws->result = $result;
     echo $ws->output($app);

@@ -300,23 +300,40 @@ class Publicacion extends Model{
             $obj = $results[0];
 
         return $obj;
+    }
 
+    /**Metodo para obtener las cantiedades de los proyectos*/
+    public static function getCount(){
+        $results=  self::find();
+        return count($results);
     }
 
     /**
      * Method to find the revista publicacion
      */
-    public static function find($id = null){
+    public static function find($id = null,$limit = null){
         if (!self::connectDB()) return null;
         $results = [];
-        $query = self::QUERY_FIND;
-        $query.= " WHERE p.estatus != " . Estatus::ESTATUS_REMOVED;
-        if ($id) $query .=" AND p.id_publicacion=?";
+        $dinParams = [];
 
+        $query = self::QUERY_FIND;
+        $query.= " WHERE p.estatus != ?";
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+
+        if ($id) {
+            $query .=" AND p.id_publicacion=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        $query.= " ORDER BY id_publicacion DESC";
+
+        if ($limit){
+            $query .= " LIMIT $limit";
+        }
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return $results;
-        if ($id) $result->bind_param("i",$id);
+        self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return $results;
 
         $results = self::mappingFromDBResult($result);
