@@ -135,6 +135,14 @@ class Participante extends Model{
 
 
     /**
+     * Method to get the count of participants available
+    */
+    public static function getCount(){
+        $results = self::find();
+        return count($results);
+    }
+
+    /**
      * Method to find all participantes, can be filter by id
     */
     public static function find($id = null,$project = null){

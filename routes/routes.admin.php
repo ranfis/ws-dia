@@ -16,6 +16,52 @@ $app->options('/(:name+)', function() use ($app) {
     $app->response()->header('Access-Control-Allow-Headers', 'X-Requested-With, X-authentication, X-client');
 });
 
+
+$app->get(\Config\Routes::DASHBOARD, function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET ? $_GET : null;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $result = [
+        "congress"=>0,
+        "projects_total"=>0,
+        "projects_no_finished"=>0,
+        "projects_processing"=>0,
+        "projects_finished"=>0,
+        "projects_denied"=>0,
+        "projects_review"=>0,
+        "projects_accepted"=>0,
+        "participants"=>0,
+        "last_projects"=>[],
+        "last_congress"=>[]
+    ];
+
+    $result['congress'] = \Model\Congreso::getCount();
+    $result['projects_total'] = \Model\Proyecto::getCount();
+    $result['projects_no_finished'] = \Model\Proyecto::getCount(\Model\EstadoActual::ESTADO_ACTUAL_NO_FINALIZADO);
+    $result['projects_processing'] = \Model\Proyecto::getCount(\Model\EstadoActual::ESTADO_ACTUAL_EN_PROCESO);
+    $result['projects_finished'] = \Model\Proyecto::getCount(\Model\EstadoActual::ESTADO_ACTUAL_FINALIZADO);
+    $result['projects_denied'] = \Model\Proyecto::getCount(null,\Model\EstatusAplicacion::ESTATUS_APP_RECHAZADA);
+    $result['projects_review'] = \Model\Proyecto::getCount(null,\Model\EstatusAplicacion::ESTATUS_APP_EN_REVISION);
+    $result['projects_accepted'] = \Model\Proyecto::getCount(null,\Model\EstatusAplicacion::ESTATUS_APP_ACEPTADA);
+    $result['participants'] = \Model\Participante::getCount();
+
+    $resultFounds = \Model\Proyecto::find(null,null,null,10);
+    foreach($resultFounds as $pro){
+        $result['last_projects'][] = $pro->toArray();
+    }
+
+    $resultFounds = \Model\Congreso::find(null,10);
+    foreach($resultFounds as $con){
+        $result['last_congress'][] = $con->toArray();
+    }
+
+
+
+    $ws->result = $result;
+    echo $ws->output($app);
+});
+
+
 $app->get(\Config\Routes::CONGRESS_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
     $param = $_GET ? $_GET : null;

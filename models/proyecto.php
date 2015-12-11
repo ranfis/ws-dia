@@ -446,7 +446,6 @@ class Proyecto extends Model{
         $this->moneda = $moneda;
     }
 
-
     /**
      * @return Proyecto
     */
@@ -463,7 +462,7 @@ class Proyecto extends Model{
      * Method to find the revista publicacion
      * @return array(Proyecto)
      */
-    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null){
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
@@ -484,6 +483,12 @@ class Proyecto extends Model{
         if ($estadoAplicacion) {
             $query .=" AND p.id_estado_aplicacion=?";
             $dinParams[] = self::getBindParam("i",$estadoAplicacion);
+        }
+
+        $query.= " ORDER BY fecha_creacion desc";
+
+        if ($limit){
+            $query.= " LIMIT " . $limit;
         }
 
         $query = self::formatQuery($query);
@@ -618,7 +623,7 @@ class Proyecto extends Model{
 
 
     /**Metodo para obtener las cantiedades de los proyectos*/
-    public function getCount($estatusActual = null,$estadoAplicacion = null){
+    public static function getCount($estatusActual = null,$estadoAplicacion = null){
         $results=  self::find(null,$estatusActual,$estadoAplicacion);
         return count($results);
     }

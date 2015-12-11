@@ -6,6 +6,9 @@ class Routes{
     const USER_SUMMARY          = "/summary";
     const USER_LOGOUT           = "/logout";
 
+
+    const DASHBOARD             = "/dashboard";
+
     //Congress
     //POST
     const  SPONSOR_ADD          = "/sponsor/add";

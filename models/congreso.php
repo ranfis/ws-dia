@@ -179,24 +179,39 @@ class Congreso extends  \Model\Model{
         return $con;
     }
 
+    /**
+     * Method to get the count of congress
+    */
+    public static function getCount(){
+        $results = self::find();
+        return count($results);
+    }
 
     /**
      * Method to find all the congress
     */
-    public static function find($id = null){
+    public static function find($id = null,$limit = null){
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
         $results = [];
 
-        $query.= " WHERE C.estatus != 3";
-        if ($id) $query.= " AND C.id_congreso=?";
+        $dinParams = [];
+        $query.= " WHERE C.estatus != ?";
+        $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+
+        if ($id) {
+            $query.= " AND C.id_congreso=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($limit){
+            $query.= " LIMIT $limit";
+        }
 
         $query = self::formatQuery($query);
 
         if (!$result = self::$dbManager->query($query)) return $results;
-
-        if ($id) $result->bind_param("i",$id);
-
+        self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return $results;
 
         return self::mappingFromDBResult($result);
