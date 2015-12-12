@@ -734,9 +734,9 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->getMoneda()->getId());
         $dinParams[] = self::getBindParam("d",$this->getMontoTotal());
         $dinParams[] = self::getBindParam("d",$this->getOverhead());
-        $dinParams[] = self::getBindParam("i",$this->getSoftware());
-        $dinParams[] = self::getBindParam("i",$this->getPatente());
-        $dinParams[] = self::getBindParam("s",$this->getOtroProducto());
+        $dinParams[] = self::getBindParam("i",$this->getSoftware() ? "1" : "0");
+        $dinParams[] = self::getBindParam("i",$this->getPatente() ? "1" : "0");
+        $dinParams[] = self::getBindParam("s",$this->getOtroProducto() ? $this->getOtroProducto() : "n/a");
         $dinParams[] = self::getBindParam("i",$this->getInvestigador()->getId());
         $dinParams[] = self::getBindParam("i",$this->getId());
 
