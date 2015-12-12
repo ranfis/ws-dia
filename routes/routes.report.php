@@ -25,7 +25,7 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Inicio","Moneda","Monto Total"];
+    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Moneda","Monto Total"];
 
     $projects = \Model\Proyecto::find();
 
@@ -37,8 +37,8 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = $project->getFechaAplicacion();
-        $row[] = $project->getFechaInicio();
+        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
+        $row[] = date("Y",strtotime($project->getFechaInicio()));
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getMontoTotal();
         $total = $total + $project->getMontoTotal();
@@ -63,7 +63,7 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Inicio","Moneda","Overhead"];
+    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Moneda","Overhead"];
 
     $projects = \Model\Proyecto::find();
 
@@ -75,8 +75,8 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = $project->getFechaAplicacion();
-        $row[] = $project->getFechaInicio();
+        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
+        $row[] = date("Y",strtotime($project->getFechaInicio()));
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getOverhead();
         $total = $total + $project->getOverhead();

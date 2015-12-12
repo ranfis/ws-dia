@@ -47,7 +47,7 @@ class InstitucionProyecto extends Institucion{
     public static function findByProject($id){
         if (!self::connectDB()) return null;
         $results = [];
-        $query = "SELECT phi.proyectos_id_proyecto,i.descripcion 'institucion_nombre',i.estatus,phi.principal from proyecto_has_institucion phi INNER JOIN institucion i ON phi.instituciones_id_institucion = i.id_institucion";
+        $query = "SELECT i.id_institucion,i.descripcion 'institucion_nombre',i.estatus,phi.principal from proyecto_has_institucion phi INNER JOIN institucion i ON phi.instituciones_id_institucion = i.id_institucion";
         $query.= " WHERE i.estatus != ?";
         $dinParams = [];
 
