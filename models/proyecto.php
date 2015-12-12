@@ -11,7 +11,7 @@ require_once("models/unidadEjecutoraProyecto.php");
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda, p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id, p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual";
+    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id, p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual INNER JOIN moneda m on p.moneda = m.id";
 
     private $id;
     //String
@@ -513,7 +513,8 @@ class Proyecto extends Model{
             $bindResult['estado_actual'],$bindResult['estado_actual_nombre'],
             $bindResult['estado_aplicacion'],$bindResult['estado_aplicacion_nombre'],
             $bindResult['contrapartida'],$bindResult['aporte'],
-            $bindResult['moneda'],$bindResult['monto'],$bindResult['overhead'],$bindResult['software'],
+            $bindResult['moneda'],$bindResult['moneda_simbolo'],
+            $bindResult['monto'],$bindResult['overhead'],$bindResult['software'],
             $bindResult['patente'],$bindResult['otro_producto'],$bindResult['investigador'],
             $bindResult['estatus'],$bindResult['creador'],$bindResult['fecha_creacion']);
 
@@ -537,7 +538,7 @@ class Proyecto extends Model{
             $pro->setContraPartida($bindResult['contrapartida']);
             $pro->setAporte($bindResult['aporte']);
 
-            $moneda = new Moneda($bindResult['moneda']);
+            $moneda = new Moneda($bindResult['moneda'],$bindResult['moneda_simbolo']);
             $pro->setMoneda($moneda);
 
             $pro->setMontoTotal($bindResult['monto']);

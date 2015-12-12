@@ -8,7 +8,7 @@ require_once("models/institucion.php");
 require_once("models/unidadEjecutora.php");
 require_once("models/proyecto.php");
 require_once("models/moneda.php");
-
+require_once("core/ReportFileManager.php");
 
 $app->options('/(:name+)', function() use ($app) {
     $app->response()->header('Access-Control-Allow-Origin','*');
@@ -1101,4 +1101,3 @@ $app->get(\Config\Routes::CURRENT_STATUS_LIST,function() use ($app,$param){
     $ws->result = $statuses;
     echo $ws->output($app);
 });
-
