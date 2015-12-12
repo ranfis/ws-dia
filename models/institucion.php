@@ -158,7 +158,7 @@ class Institucion extends Model{
      * Method to mapping from database result
      *
     */
-    private static function mappingFromDBResult(&$result){
+    protected static function mappingFromDBResult(&$result){
         $bindResult= [];
         $result->bind_result($bindResult['id'],$bindResult['descripcion'],$bindResult['estatus']);
 

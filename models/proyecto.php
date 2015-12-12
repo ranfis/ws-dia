@@ -11,7 +11,7 @@ require_once("models/unidadEjecutoraProyecto.php");
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id, p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual INNER JOIN moneda m on p.moneda = m.id";
+    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id,i.NOMBRE 'investigador_nombre',i.APELLIDO 'investigador_apellido', p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual INNER JOIN moneda m on p.moneda = m.id inner join participante i on p.investigador_id=i.id";
 
     private $id;
     //String
@@ -515,7 +515,8 @@ class Proyecto extends Model{
             $bindResult['contrapartida'],$bindResult['aporte'],
             $bindResult['moneda'],$bindResult['moneda_simbolo'],
             $bindResult['monto'],$bindResult['overhead'],$bindResult['software'],
-            $bindResult['patente'],$bindResult['otro_producto'],$bindResult['investigador'],
+            $bindResult['patente'],$bindResult['otro_producto'],
+            $bindResult['investigador'],$bindResult['investigador_nombre'],$bindResult['investigador_apellido'],
             $bindResult['estatus'],$bindResult['creador'],$bindResult['fecha_creacion']);
 
         $results = [];
@@ -547,7 +548,9 @@ class Proyecto extends Model{
             $pro->setPatente($bindResult['patente'] ? true : false);
             $pro->setOtroProducto($bindResult['otro_producto']);
 
-            $inv = new Participante($bindResult['investigador']);
+            $inv = new Participante($bindResult['investigador'],$bindResult['investigador_nombre']);
+            $inv->setApellido($bindResult['investigador_apellido']);
+
             $pro->setInvestigador($inv);
 
             $estatus = new Estatus($bindResult['estatus']);
@@ -567,12 +570,12 @@ class Proyecto extends Model{
             $pro->setFondos($funds);
 
             //units
-            //$units = UnidadEjecutoraProyecto::findByProject($bindResult['id']);
-            //$pro->setUnidadesEjecutora($units);
+            $units = UnidadEjecutoraProyecto::findByProject($bindResult['id']);
+            $pro->setUnidadesEjecutora($units);
 
             //institutions
-            //$institutions = InstitucionProyecto::findByProject($bindResult['id']);
-            //$pro->setInstituciones($institutions);
+            $institutions = InstitucionProyecto::findByProject($bindResult['id']);
+            $pro->setInstituciones($institutions);
 
             $results[] = $pro;
         }
@@ -591,15 +594,19 @@ class Proyecto extends Model{
         $result['date_application'] = $this->getFechaAplicacion();
         $result['date_start'] = $this->getFechaInicio();
 
-        $result['advisor']= [];
-        $result['advisor']['id'] = $this->getAsesor()->getId();
+        $result['adviser']= [];
+        $result['adviser']['id'] = $this->getAsesor()->getId();
 
-        $result['actual_status'] = $this->getEstatusActual()->toArray();
+        $result['current_status'] = $this->getEstatusActual()->toArray();
         $result['application_status']= $this->getEstatusAplicacion()->toArray();
 
+        $result['researcher'] = [];
+        $result['researcher']['id']         = $this->getInvestigador()->getId();
+        $result['researcher']['name']       = $this->getInvestigador()->getNombre();
+        $result['researcher']['lastname']   = $this->getInvestigador()->getApellido();
 
-        $result['contrapartida'] = $this->getContraPartida() + 0;
-        $result['input'] = $this->getAporte();
+        $result['counterpart']  = $this->getContraPartida() + 0;
+        $result['input']        = $this->getAporte();
 
         $result['currency'] = [];
         $result['currency']['id'] = $this->getMoneda()->getId();
@@ -619,6 +626,18 @@ class Proyecto extends Model{
         $result['funds'] = [];
         foreach($this->getFondos() as $fondo)
             $result['funds'][] = $fondo->toArray();
+
+        $result['executing_units'] = [];
+        foreach($this->getUnidadesEjecutora() as $unit)
+            $result['executing_units'][] = $unit->toArray();
+
+        $result['institutions'] = [];
+        foreach($this->getInstituciones() as $ins)
+            $result['institutions'][] = $ins->toArray();
+
+
+
+
         return $result;
     }
 

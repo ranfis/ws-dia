@@ -108,7 +108,7 @@ class User extends Model{
 	 */
 	private  static function lastLogin($user){
 		if (!self::connectDB()) return null;
-		$query = User::formatQuery("UPDATE {PREF_TABLE}USUARIO_APLICACION SET FECHA_LOGIN= ? WHERE ID=?");
+		$query = User::formatQuery("UPDATE {PREF_TABLE}usuario_aplicacion SET FECHA_LOGIN= ? WHERE ID=?");
 		$lastLogin = date("Y-m-d H:i:s");
 		if (!$result = self::$dbManager->query($query)) return;
 		$result->bind_param("si",$lastLogin,$user->id);
