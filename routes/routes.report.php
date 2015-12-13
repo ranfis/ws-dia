@@ -28,7 +28,7 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
     $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Investigador","Moneda","Monto Total"];
 
 
-    $year = $param['year'] ? $param['year'] : null;
+    $year = isset($param['year']) ? $param['year'] : null;
 
     $projects = \Model\Proyecto::find(null,null,null,null,$year);
 
