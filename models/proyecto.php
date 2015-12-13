@@ -462,7 +462,7 @@ class Proyecto extends Model{
      * Method to find the revista publicacion
      * @return array(Proyecto)
      */
-    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null){
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$ano = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
@@ -483,6 +483,12 @@ class Proyecto extends Model{
         if ($estadoAplicacion) {
             $query .=" AND p.id_estado_aplicacion=?";
             $dinParams[] = self::getBindParam("i",$estadoAplicacion);
+        }
+
+        if ($ano){
+            $query .=" AND YEAR(p.fecha_aplicacion)=?";
+            $dinParams[] = self::getBindParam("s",$ano);
+
         }
 
         $query.= " ORDER BY fecha_creacion desc";

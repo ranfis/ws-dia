@@ -27,7 +27,10 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
 
     $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Moneda","Monto Total"];
 
-    $projects = \Model\Proyecto::find();
+
+    $year = $param['year'] ? $param['year'] : null;
+
+    $projects = \Model\Proyecto::find(null,null,null,null,$year);
 
     $rows= [];
 
@@ -49,7 +52,11 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
     $rows[] = ["","","","","",$total];
 
 
-    $report = new ReportFileManager("ganacias-proyectos");
+    $filename = "ganacias-proyectos";
+    if ($year)
+        $filename.= "-$year";
+
+    $report = new ReportFileManager($filename);
     $report->setHeader($headers);
     foreach($rows as $row)
         $report->addRow($row);
@@ -65,7 +72,9 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
 
     $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Moneda","Overhead"];
 
-    $projects = \Model\Proyecto::find();
+    $year = $param['year'] ? $param['year'] : null;
+
+    $projects = \Model\Proyecto::find(null,null,null,null,$year);
 
     $rows= [];
 
@@ -87,7 +96,12 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
     $rows[] = ["","","","","",$total];
 
 
-    $report = new ReportFileManager("ganancias-proyectos-overhead");
+    $filename = "ganancias-proyectos-overhead";
+
+    if ($year)
+        $filename.= "-$year";
+
+    $report = new ReportFileManager($filename);
     $report->setHeader($headers);
     foreach($rows as $row)
         $report->addRow($row);
