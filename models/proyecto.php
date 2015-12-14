@@ -11,7 +11,7 @@ require_once("models/unidadEjecutoraProyecto.php");
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor, p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id,i.NOMBRE 'investigador_nombre',i.APELLIDO 'investigador_apellido', p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual INNER JOIN moneda m on p.moneda = m.id inner join participante i on p.investigador_id=i.id";
+    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor,a.NOMBRE 'asesor_nombre',a.APELLIDO 'asesor_apellido', p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id,i.NOMBRE 'investigador_nombre',i.APELLIDO 'investigador_apellido', p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual INNER JOIN moneda m on p.moneda = m.id inner join participante i on p.investigador_id=i.ID inner join participante a on p.asesor = a.ID";
 
     private $id;
     //String
@@ -462,7 +462,7 @@ class Proyecto extends Model{
      * Method to find the revista publicacion
      * @return array(Proyecto)
      */
-    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$ano = null,$investigador = null){
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$year = null,$investigador = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
@@ -485,9 +485,9 @@ class Proyecto extends Model{
             $dinParams[] = self::getBindParam("i",$estadoAplicacion);
         }
 
-        if ($ano){
+        if ($year){
             $query .=" AND YEAR(p.fecha_aplicacion)=?";
-            $dinParams[] = self::getBindParam("s",$ano);
+            $dinParams[] = self::getBindParam("s",$year);
         }
 
         if ($investigador){
@@ -520,7 +520,8 @@ class Proyecto extends Model{
         $bindResult = [];
         $result->bind_result(
             $bindResult['id'],$bindResult['description'],$bindResult['fecha_aplicacion'],
-            $bindResult['fecha_inicio'], $bindResult['asesor'],
+            $bindResult['fecha_inicio'],
+            $bindResult['asesor'],$bindResult['asesor_nombre'],$bindResult['asesor_apellido'],
             $bindResult['estado_actual'],$bindResult['estado_actual_nombre'],
             $bindResult['estado_aplicacion'],$bindResult['estado_aplicacion_nombre'],
             $bindResult['contrapartida'],$bindResult['aporte'],
@@ -538,7 +539,7 @@ class Proyecto extends Model{
             $pro->setFechaAplicacion($bindResult['fecha_aplicacion']);
             $pro->setFechaInicio($bindResult['fecha_inicio']);
 
-            $asesor = new Participante($bindResult['asesor']);
+            $asesor = new Participante($bindResult['asesor'],$bindResult['asesor_nombre'],$bindResult['asesor_apellido']);
             $pro->setAsesor($asesor);
 
             $estadoActual = new EstadoActual($bindResult['estado_actual'],$bindResult['estado_actual_nombre']);
@@ -625,6 +626,8 @@ class Proyecto extends Model{
         $result['total_amount'] = $this->getMontoTotal() + 0;
 
         $result['overhead'] = $this->getOverhead() + 0;
+
+        $result['other_product'] = $this->otroProducto;
 
         $result['software'] = $this->getSoftware();
 

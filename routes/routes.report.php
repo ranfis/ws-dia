@@ -284,10 +284,10 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
     if (!validateSessionFile($param)) return true;
 
     $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final",
-                "Asesor","Estado Actual","Estado Aplicacion","Investigador",
-                "Contrapartida","Aporte","Moneda",
-                "Monto Total","Overhead","Software","Patente",
-                "Co-Investigadores","Fondos","Unidades Ejecutoras","Instituciones"];
+        "Asesor","Estado Actual","Estado Aplicacion","Investigador",
+        "Contrapartida","Aporte","Moneda",
+        "Monto Total","Overhead","Software","Patente",
+        "Co-Investigadores","Fondos","Unidades Ejecutoras","Instituciones"];
 
     $year = isset($param['year']) ? $param['year'] : null;
     $estatusAplication = isset($param['application_status']) ? $param['application_status'] : null;
@@ -346,9 +346,7 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
 
         $rows[] = $row;
     }
-
     $filename = "proyectos";
-
 
     if ($estatusAplication){
         $estatusAplication = \Model\EstatusAplicacion::findById($estatusAplication);
@@ -367,6 +365,102 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
             $filename.= "-$name";
         }
     }
+
+    if ($year)
+        $filename.= "-$year";
+
+    $report = new ReportFileManager($filename);
+    $report->setHeader($headers);
+    foreach($rows as $row)
+        $report->addRow($row);
+
+    $filename = $report->generateFile();
+});
+
+$app->get("/report/annual/:s",function($sessionId) use($app,$param){
+    $param = $_GET ? $_GET : [];
+    $param['session_id'] = $sessionId;
+    if (!validateSessionFile($param)) return true;
+
+    $headers = [""];
+
+    $year = isset($param['year']) ? $param['year'] : null;
+
+    $projects = \Model\Proyecto::find(null,null,null,null,$year);
+
+    $rows= [];
+
+    $rows[] = ["Proyectos",$year ? $year : ""];
+    $rows[] = ["ID","Descripcion","Investigador","Estado Actual","Estado Aplicacion","Moneda","Monto Total","Overhead"];
+
+    foreach($projects as $project){
+        $row = [];
+        $row[] = $project->getId();
+        $row[] = $project->getDescripcion();
+        $row[] = $project->getInvestigador()->getNombre();
+        $row[] = $project->getEstatusActual()->getDescripcion();
+        $row[] = $project->getEstatusAplicacion()->getDescripcion();
+        $row[] = $project->getMoneda()->getSimbolo();
+        $row[] = $project->getMontoTotal();
+        $row[] = $project->getOverhead();
+        $rows[] = $row;
+    }
+    $rows[] = ["Total Proyectos",count($projects)];
+    $rows[] = [""];
+    $rows[] = [""];
+
+    $rows[] = ["Congresos"];
+    $rows[] = ["ID","Nombre","Tema","Lugar","Patrocinio","Autor"];
+
+    $congress = \Model\Congreso::find(null,null,$year);
+
+    foreach($congress as $c){
+        $row = [];
+        $row[] = $c->getId();
+        $row[] = $c->getNombre();
+        $row[] = $c->getPonencia();
+        $row[] = $c->getLugar();
+        $row[] = $c->getPatrocinio()->getName();
+
+        $authors = "";
+        foreach($c->getParticipantes() as $author){
+            $authors.= $author->getNombre() .  " " . $author->getApellido() . "\n";
+        }
+        $row[] = $authors;
+        $rows[] = $row;
+    }
+
+    $rows[] = ["Total Congresos",count($congress)];
+    $rows[] = [""];
+    $rows[] = [""];
+
+
+    $rows[] = ["Publicaciones"];
+    $rows[] = ["ID","Nombre","Revista","Autores","Propiedad Intelectual"];
+
+    $rows[] = [""];
+    $rows[] = [""];
+    $rows[] = [""];
+
+    $publications = \Model\Publicacion::find(null,null,$year);
+
+    foreach($publications as $publication){
+        $row = [];
+        $row[] = $publication->getId();
+        $row[] = $publication->getDescripcion();
+        $row[] = $publication->getRevista()->getDescripcion();
+
+        $authors = "";
+        foreach($publication->getParticipantes() as $author){
+            $authors.= $author->getNombre() .  " " . $author->getApellido() . "\n";
+        }
+        $row[] = $authors;
+        $row[] = $publication->hasPropiedadIntelectual() ? "SI": "NO";
+        $rows[] = $row;
+    }
+    $rows[] = ["Total Publicaciones",count($publications)];
+
+    $filename = "memoria-anual";
 
     if ($year)
         $filename.= "-$year";
