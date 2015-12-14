@@ -103,6 +103,8 @@ function validateCongress(&$ws,&$app,&$param,$update = false){
         return false;
     }
 
+    $participantes = is_array($participantes) ? $participantes : [];
+
     //verify if any of the participans is invalid
     foreach($participantes as $k=>$p){
         $pos = $k+1;
@@ -459,6 +461,9 @@ function validatePublication(&$ws,&$app,&$param,$update = false){
         echo $ws->output($app);
         return false;
     }
+
+
+    $participantes = is_array($participantes)  ? $participantes : [];
 
     //verify if any of the participans is invalid
     foreach($participantes as $k=>$p){
@@ -865,12 +870,12 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     //else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
     //else if ($patente === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene patente");
     else if ($update && ($estatusActual === null || !$estatusActual)) $ws->generate_error(01,"El estatus actual es requerido");
-    else if ($estatusActual && !StringValidator::isInteger($estatusActual)) $ws->generate_error(01,"El estatus actual es inv&aacute;lido");
+    else if ($update && !StringValidator::isInteger($estatusActual)) $ws->generate_error(01,"El estatus actual es inv&aacute;lido");
     else if ($estatusAplicacion === null || !$estatusAplicacion) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n es requerido");
     else if (!StringValidator::isInteger($estatusAplicacion)) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n es inv&aacute;lido");
     else if ($investigador === null || !$investigador) $ws->generate_error(01,"El investigador es requerido");
     else if (!StringValidator::isInteger($investigador)) $ws->generate_error(01,"El investigador es inv&aacute;lido");
-    else if (!$estatusActual = \Model\EstadoActual::findById($estatusActual)) $ws->generate_error(01,"El estado actual no fue encontrado");
+    else if ($update && !$estatusActual = \Model\EstadoActual::findById($estatusActual)) $ws->generate_error(01,"El estado actual no fue encontrado");
     else if (!$estatusAplicacion = \Model\EstatusAplicacion::findById($estatusAplicacion)) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n no fue encontrado");
     else if ($asesor && !$asesor = \Model\Participante::findById($asesor)) $ws->generate_error("01","Asesor no encontrado");
     else if (!$investigador = \Model\Participante::findById($investigador)) $ws->generate_error("01","Investigador no encontrado");
