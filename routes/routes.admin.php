@@ -993,7 +993,7 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     $proyecto->setFechaInicio($fechaInicio);
     $proyecto->setAsesor($asesor);
 
-    if (!$update)
+    if (!$estatusActual)
         $estatusActual = new \Model\EstadoActual(\Model\EstadoActual::ESTADO_ACTUAL_NO_FINALIZADO);
     $proyecto->setEstatusActual($estatusActual);
 
