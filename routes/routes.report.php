@@ -207,7 +207,7 @@ $app->get("/report/publications/:s",function($sessionId) use($app,$param){
         $row = [];
         $row[] = $publication->getId();
         $row[] = $publication->getDescripcion();
-        $row[] = date("Y",strtotime($publication->getFecha()));
+        $row[] = substr($publication->getFecha(),0,4);
         $row[] = $publication->getRevista()->getDescripcion();
 
         $authors = "";
@@ -301,8 +301,9 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
-        $row[] = date("Y",strtotime($project->getFechaInicio()));
+
+        $row[] = substr($project->getFechaAplicacion(),0,4);
+        $row[] = substr($project->getFechaInicio(),0,4);
         $row[] = $project->getAsesor()->getNombre();
         $row[] = $project->getEstatusActual()->getDescripcion();
         $row[] = $project->getEstatusAplicacion()->getDescripcion();
