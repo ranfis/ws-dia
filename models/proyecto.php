@@ -756,18 +756,18 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("s",$this->descripcion);
         $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
         $dinParams[] = self::getBindParam("s",$this->fechaInicio);
-        $dinParams[] = self::getBindParam("i",$this->getAsesor()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getAsesor() ? $this->getAsesor()->getId() : null);
         $dinParams[] = self::getBindParam("i",$this->getEstatusActual()->getId());
         $dinParams[] = self::getBindParam("i",$this->getEstatusAplicacion()->getId());
         $dinParams[] = self::getBindParam("d",$this->contraPartida);
         $dinParams[] = self::getBindParam("d",$this->aporte);
-        $dinParams[] = self::getBindParam("i",$this->getMoneda()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getMoneda() ? $this->getMoneda()->getId() : null);
         $dinParams[] = self::getBindParam("d",$this->getMontoTotal());
         $dinParams[] = self::getBindParam("d",$this->getOverhead());
         $dinParams[] = self::getBindParam("i",$this->getSoftware() ? "1" : "0");
         $dinParams[] = self::getBindParam("i",$this->getPatente() ? "1" : "0");
         $dinParams[] = self::getBindParam("s",$this->getOtroProducto() ? $this->getOtroProducto() : "n/a");
-        $dinParams[] = self::getBindParam("i",$this->getInvestigador()->getId());
+        $dinParams[] = self::getBindParam("i",$this->getInvestigador() ?  $this->getInvestigador()->getId() : null);
         $dinParams[] = self::getBindParam("i",$this->getId());
 
         $query = self::formatQuery($query);
