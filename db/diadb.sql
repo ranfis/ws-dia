@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `proyecto` (
   `id_estado_aplicacion` int(11) NOT NULL,
   `contrapartida_unibe` decimal(10,0) DEFAULT NULL,
   `aporte_unibe` varchar(45) DEFAULT NULL,
-  `moneda` int(11) NOT NULL,
+  `moneda` int(11) DEFAULT NULL,
   `monto_total` decimal(10,0) DEFAULT NULL,
   `overhead_unibe` decimal(10,0) DEFAULT NULL COMMENT 'monto de ganancia que se queda UNIBE de la institucion\n',
   `software` tinyint(1) DEFAULT NULL COMMENT 'determinar si es un software, o se auxilia de un software el proyecto asignado',
