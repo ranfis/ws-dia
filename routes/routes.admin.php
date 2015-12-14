@@ -886,6 +886,12 @@ function validateProject(&$ws,&$app,&$param,$update = false){
 
     $tmpCoInvestigadores = $tmpFondos = $tmpInstituciones = $tmpUnidadesEjecutora  = [];
 
+
+    $coInvestigadores = is_array($coInvestigadores) ? $coInvestigadores : [];
+    $instituciones = is_array($instituciones) ? $instituciones : [];
+    $fondos = is_array($fondos) ? $fondos : [];
+    $unidadesEjecutora = is_array($unidadesEjecutora) ? $unidadesEjecutora : [];
+
     //verify if any of the co researchers is invalid
     foreach($coInvestigadores as $k=>$p){
         $pos = $k+1;

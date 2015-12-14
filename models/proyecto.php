@@ -608,6 +608,8 @@ class Proyecto extends Model{
 
         $result['adviser']= [];
         $result['adviser']['id'] = $this->getAsesor()->getId();
+        $result['adviser']['name'] = $this->getAsesor()->getNombre();
+        $result['adviser']['lastname'] = $this->getAsesor()->getApellido();
 
         $result['current_status'] = $this->getEstatusActual()->toArray();
         $result['application_status']= $this->getEstatusAplicacion()->toArray();
@@ -683,7 +685,7 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->estatusActual->getId());
         $dinParams[] = self::getBindParam("i",$this->estatusAplicacion->getId());
         $dinParams[] = self::getBindParam("d",$this->contraPartida);
-        $dinParams[] = self::getBindParam("d",$this->aporte);
+        $dinParams[] = self::getBindParam("s",$this->aporte);
         $dinParams[] = self::getBindParam("i",$this->moneda->getId());
         $dinParams[] = self::getBindParam("d",$this->montoTotal);
         $dinParams[] = self::getBindParam("d",$this->overhead);
