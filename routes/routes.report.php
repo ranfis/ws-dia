@@ -349,6 +349,16 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
 
     $filename = "proyectos";
 
+
+    if ($estatusAplication){
+        $estatusAplication = \Model\EstatusAplicacion::findById($estatusAplication);
+        if ($estatusAplication){
+            $name = $estatusAplication->getDescripcion();
+            $name = str_replace(" ","",$name);
+            $filename.= "-$name";
+        }
+    }
+
     if ($investigador){
         $investigador = \Model\Participante::findById($investigador);
         if ($investigador){
