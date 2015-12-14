@@ -869,13 +869,13 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     //else if ($overhead === null || !$overhead) $ws->generate_error(01,"El overhead es requerido");
     //else if ($software === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene software");
     //else if ($patente === null) $ws->generate_error(01,"Determine si el proyeto contiene o no contiene patente");
-    else if ($update && ($estatusActual === null || !$estatusActual)) $ws->generate_error(01,"El estatus actual es requerido");
-    else if ($update && !StringValidator::isInteger($estatusActual)) $ws->generate_error(01,"El estatus actual es inv&aacute;lido");
+    else if (($estatusActual || $update) && ($estatusActual === null || !$estatusActual)) $ws->generate_error(01,"El estatus actual es requerido");
+    else if (($estatusActual || $update) && !StringValidator::isInteger($estatusActual)) $ws->generate_error(01,"El estatus actual es inv&aacute;lido");
     else if ($estatusAplicacion === null || !$estatusAplicacion) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n es requerido");
     else if (!StringValidator::isInteger($estatusAplicacion)) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n es inv&aacute;lido");
     else if ($investigador === null || !$investigador) $ws->generate_error(01,"El investigador es requerido");
     else if (!StringValidator::isInteger($investigador)) $ws->generate_error(01,"El investigador es inv&aacute;lido");
-    else if ($update && !$estatusActual = \Model\EstadoActual::findById($estatusActual)) $ws->generate_error(01,"El estado actual no fue encontrado");
+    else if (($estatusActual || $update) && !$estatusActual = \Model\EstadoActual::findById($estatusActual)) $ws->generate_error(01,"El estado actual no fue encontrado");
     else if (!$estatusAplicacion = \Model\EstatusAplicacion::findById($estatusAplicacion)) $ws->generate_error(01,"El estatus de la aplicaci&oacute;n no fue encontrado");
     else if ($asesor && !$asesor = \Model\Participante::findById($asesor)) $ws->generate_error("01","Asesor no encontrado");
     else if (!$investigador = \Model\Participante::findById($investigador)) $ws->generate_error("01","Investigador no encontrado");
@@ -995,6 +995,7 @@ function validateProject(&$ws,&$app,&$param,$update = false){
 
     if (!$estatusActual)
         $estatusActual = new \Model\EstadoActual(\Model\EstadoActual::ESTADO_ACTUAL_NO_FINALIZADO);
+
     $proyecto->setEstatusActual($estatusActual);
 
     //$estatusAplicacion = new \Model\EstatusAplicacion(\Model\EstatusAplicacion::ESTATUS_APP_EN_REVISION);
