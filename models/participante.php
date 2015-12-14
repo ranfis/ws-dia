@@ -86,6 +86,7 @@ class Participante extends Model{
 
     /**
      * Method to find the object by id
+     * @return Participante
     */
     public static function findById($id){
         if (!self::connectDB()) return null;

@@ -79,7 +79,7 @@ class Publicacion extends Model{
     }
 
     /**
-     * @return mixed
+     * @return RevistaPublicacion
      */
     public function getRevista()
     {
@@ -310,8 +310,9 @@ class Publicacion extends Model{
 
     /**
      * Method to find the revista publicacion
+     * @return array(Publicacion)
      */
-    public static function find($id = null,$limit = null){
+    public static function find($id = null,$limit = null,$year = null){
         if (!self::connectDB()) return null;
         $results = [];
         $dinParams = [];
@@ -323,6 +324,11 @@ class Publicacion extends Model{
         if ($id) {
             $query .=" AND p.id_publicacion=?";
             $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($year){
+            $query .= " AND YEAR(p.fecha) = ?";
+            $dinParams[] = self::getBindParam("s",$year);
         }
 
         $query.= " ORDER BY id_publicacion DESC";

@@ -190,7 +190,7 @@ class Congreso extends  \Model\Model{
     /**
      * Method to find all the congress
     */
-    public static function find($id = null,$limit = null){
+    public static function find($id = null,$limit = null,$year = null){
         if (!self::connectDB()) return null;
         $query = self::QUERY_FIND;
         $results = [];
@@ -202,6 +202,11 @@ class Congreso extends  \Model\Model{
         if ($id) {
             $query.= " AND C.id_congreso=?";
             $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($year){
+            $query .=" AND YEAR(C.fecha_congreso)=?";
+            $dinParams[] = self::getBindParam("s",$year);
         }
 
         if ($limit){
