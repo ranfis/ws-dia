@@ -539,8 +539,12 @@ class Proyecto extends Model{
             $pro->setFechaAplicacion($bindResult['fecha_aplicacion']);
             $pro->setFechaInicio($bindResult['fecha_inicio']);
 
-            $asesor = new Participante($bindResult['asesor'],$bindResult['asesor_nombre'],$bindResult['asesor_apellido']);
-            $pro->setAsesor($asesor);
+
+            if ($bindResult['asesor']){
+                $asesor = new Participante($bindResult['asesor'],$bindResult['asesor_nombre'],$bindResult['asesor_apellido']);
+                $pro->setAsesor($asesor);
+            }
+
 
             $estadoActual = new EstadoActual($bindResult['estado_actual'],$bindResult['estado_actual_nombre']);
             $pro->setEstatusActual($estadoActual);
@@ -560,10 +564,11 @@ class Proyecto extends Model{
             $pro->setPatente($bindResult['patente'] ? true : false);
             $pro->setOtroProducto($bindResult['otro_producto']);
 
-            $inv = new Participante($bindResult['investigador'],$bindResult['investigador_nombre']);
-            $inv->setApellido($bindResult['investigador_apellido']);
-
-            $pro->setInvestigador($inv);
+            if ($bindResult['investigador']){
+                $inv = new Participante($bindResult['investigador'],$bindResult['investigador_nombre']);
+                $inv->setApellido($bindResult['investigador_apellido']);
+                $pro->setInvestigador($inv);
+            }
 
             $estatus = new Estatus($bindResult['estatus']);
             $pro->setEstatus($estatus);
@@ -575,18 +580,22 @@ class Proyecto extends Model{
 
             //co-researchers
             $coResearchers = Participante::find(null,$bindResult['id']);
+            $coResearchers = is_array($coResearchers) ? $coResearchers : [];
             $pro->setCoInvestigadores($coResearchers);
 
             //funds
             $funds = Fondo::find(null,$bindResult['id']);
+            $funds = is_array($funds) ? $funds : [];
             $pro->setFondos($funds);
 
             //units
             $units = UnidadEjecutoraProyecto::findByProject($bindResult['id']);
+            $units = is_array($units) ? $units : [];
             $pro->setUnidadesEjecutora($units);
 
             //institutions
             $institutions = InstitucionProyecto::findByProject($bindResult['id']);
+            $institutions = is_array($institutions) ? $institutions : [];
             $pro->setInstituciones($institutions);
 
             $results[] = $pro;
@@ -606,18 +615,26 @@ class Proyecto extends Model{
         $result['date_application'] = $this->getFechaAplicacion();
         $result['date_start'] = $this->getFechaInicio();
 
+
         $result['adviser']= [];
-        $result['adviser']['id'] = $this->getAsesor()->getId();
-        $result['adviser']['name'] = $this->getAsesor()->getNombre();
-        $result['adviser']['lastname'] = $this->getAsesor()->getApellido();
+
+        if ($this->getAsesor()){
+            $result['adviser']['id'] = $this->getAsesor()->getId();
+            $result['adviser']['name'] = $this->getAsesor()->getNombre();
+            $result['adviser']['lastname'] = $this->getAsesor()->getApellido();
+        }
 
         $result['current_status'] = $this->getEstatusActual()->toArray();
         $result['application_status']= $this->getEstatusAplicacion()->toArray();
 
         $result['researcher'] = [];
-        $result['researcher']['id']         = $this->getInvestigador()->getId();
-        $result['researcher']['name']       = $this->getInvestigador()->getNombre();
-        $result['researcher']['lastname']   = $this->getInvestigador()->getApellido();
+
+
+        if ($this->getInvestigador()){
+            $result['researcher']['id']         = $this->getInvestigador()->getId();
+            $result['researcher']['name']       = $this->getInvestigador()->getNombre();
+            $result['researcher']['lastname']   = $this->getInvestigador()->getApellido();
+        }
 
         $result['counterpart']  = $this->getContraPartida() + 0;
         $result['input']        = $this->getAporte();
@@ -681,18 +698,18 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("s",$this->descripcion);
         $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
         $dinParams[] = self::getBindParam("s",$this->fechaInicio);
-        $dinParams[] = self::getBindParam("i",$this->asesor->getId());
+        $dinParams[] = self::getBindParam("i",$this->asesor ? $this->asesor->getId() : null);
         $dinParams[] = self::getBindParam("i",$this->estatusActual->getId());
         $dinParams[] = self::getBindParam("i",$this->estatusAplicacion->getId());
-        $dinParams[] = self::getBindParam("d",$this->contraPartida);
+        $dinParams[] = self::getBindParam("d",$this->contraPartida ? $this->contraPartida : null);
         $dinParams[] = self::getBindParam("s",$this->aporte);
         $dinParams[] = self::getBindParam("i",$this->moneda->getId());
         $dinParams[] = self::getBindParam("d",$this->montoTotal);
-        $dinParams[] = self::getBindParam("d",$this->overhead);
+        $dinParams[] = self::getBindParam("d",$this->overhead ? $this->overhead : "");
         $dinParams[] = self::getBindParam("i",$this->software ? 1: 0);
         $dinParams[] = self::getBindParam("i",$this->patente ? 1: 0);
         $dinParams[] = self::getBindParam("s",$this->otroProducto ? $this->otroProducto : "");
-        $dinParams[] = self::getBindParam("i",$this->investigador->getId());
+        $dinParams[] = self::getBindParam("i",$this->investigador ? $this->investigador->getId() : "");
         $dinParams[] = self::getBindParam("i",$this->estatus->getId());
         $dinParams[] = self::getBindParam("i",$this->creador->id);
 

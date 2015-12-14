@@ -48,10 +48,7 @@ class Model{
         foreach($bindParams as $bindParam){
             if (isset($bindParam['type']))
                 $param_type.= $bindParam['type'];
-
-            if (isset($bindParam['value']))
-                $param_value[] = & $bindParam['value'];
-
+            $param_value[] = & $bindParam['value'];
         }
 
         /* with call_user_func_array, array params must be passed by reference */
