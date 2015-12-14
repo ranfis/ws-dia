@@ -251,7 +251,7 @@ $app->get("/report/congress/:s",function($sessionId) use($app,$param){
         $row = [];
         $row[] = $c->getId();
         $row[] = $c->getNombre();
-        $row[] = date("Y",strtotime($c->getFechaCongreso()));
+        $row[] = substr($c->getFechaCongreso(),0,4);
         $row[] = $c->getPonencia();
         $row[] = $c->getLugar();
         $row[] = $c->getPatrocinio()->getName();
