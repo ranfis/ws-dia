@@ -439,10 +439,6 @@ $app->get("/report/annual/:s",function($sessionId) use($app,$param){
     $rows[] = ["Publicaciones"];
     $rows[] = ["ID","Nombre","Revista","Autores","Propiedad Intelectual"];
 
-    $rows[] = [""];
-    $rows[] = [""];
-    $rows[] = [""];
-
     $publications = \Model\Publicacion::find(null,null,$year);
 
     foreach($publications as $publication){
