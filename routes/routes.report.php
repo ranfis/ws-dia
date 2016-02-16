@@ -304,7 +304,7 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
 
         $row[] = substr($project->getFechaAplicacion(),0,4);
         $row[] = substr($project->getFechaInicio(),0,4);
-        $row[] = $project->getAsesor()->getNombre();
+        $row[] = $project->getAsesor() ? $project->getAsesor()->getNombre() : null;
         $row[] = $project->getEstatusActual()->getDescripcion();
         $row[] = $project->getEstatusAplicacion()->getDescripcion();
         $row[] = $project->getInvestigador()->getNombre();
