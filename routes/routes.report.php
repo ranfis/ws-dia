@@ -39,8 +39,8 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
-        $row[] = date("Y",strtotime($project->getFechaInicio()));
+        $row[] = substr($project->getFechaAplicacion(),0,4);
+        $row[] = substr($project->getFechaInicio(),0,4);
         $row[] = $project->getInvestigador()->getNombre();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getMontoTotal();
@@ -84,8 +84,8 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
-        $row[] = date("Y",strtotime($project->getFechaInicio()));
+        $row[] = substr($project->getFechaAplicacion(),0,4);
+        $row[] = substr($project->getFechaInicio(),0,4);
         $row[] = $project->getInvestigador()->getNombre();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getOverhead();
@@ -130,8 +130,8 @@ $app->get("/report/projects/earnings/total-amount-overhead/:s",function($session
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = date("Y",strtotime($project->getFechaAplicacion()));
-        $row[] = date("Y",strtotime($project->getFechaInicio()));
+        $row[] = substr($project->getFechaAplicacion(),0,4);
+        $row[] = substr($project->getFechaInicio(),0,4);
         $row[] = $project->getInvestigador()->getNombre();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getMontoTotal();
