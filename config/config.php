@@ -21,3 +21,5 @@ class Config{
 	
 	public static $formatDate = "d-m-Y";
 }
+
+date_default_timezone_set("America/Santo_Domingo");

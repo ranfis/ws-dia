@@ -7,38 +7,109 @@ class User extends Model{
 	
 	const QUERY_FIND = "SELECT U.ID, U.CORREO, U.CLAVE, U.NOMBRE_COMPLETO, U.VER_CODIGO, U.FECHA_LOGIN, U.FECHA_CREACION,U.ROLE_ID,R.NOMBRE 'ROLE_NOMBRE' FROM usuario_aplicacion U INNER JOIN role R on U.ROLE_ID=R.ID";
 	
-	public $id;
-	public $correo;
+	public  $id;
+	public  $correo;
 	private $clave;
-	public $nombreCompleto;
-	public $verifCodigo;
-	public $fechaLogin;
-	public $fechaCreacion;
+	public  $nombreCompleto;
+	public  $verifCodigo;
+	public  $fechaLogin;
+	public  $fechaCreacion;
+
+    //@var Estatus
+	public  $estatus;
+
+    //@var Role
     private $role;
 
-	public function __construct($id= null,$correo = null){
-        $this->id = $id;
-        $this->correo = $correo;
+	public function __construct($id= null,$correo = null,$clave = null){
+        $this->id       = $id;
+        $this->correo   = $correo;
+        $this->clave    = $clave;
 	}
 
 	/**
 	 * Method to get the user by id
+     * @return User
 	 */
-	public function findById($id){
-		if (!self::connectDB()) return null;
-		$user = new User();
-		$query = User::formatQuery(self::QUERY_FIND);
-		$query.= " WHERE U.ID=?";
-		if (!$result = self::$dbManager->query($query)) return $user;
-		$result->bind_param("i",$id);
-		if (!self::$dbManager->executeSql($result)) return $user;
-		
-		$users = User::mappingFromDBResult($result);
-		
+	public static function findById($id,$me = null){
+        $users = self::find($id,$me);
+        $user = null;
 		if (is_array($users) && count($users) == 1)
 			$user = $users[0];
 		return $user;
 	}
+
+    /**
+     * Method to get the user by id
+     * @return User
+     */
+    public static function findByEmail($email,$me = null){
+        $users = self::find(null,$me,$email);
+
+        $user = null;
+        if (is_array($users) && count($users) == 1)
+            $user = $users[0];
+        return $user;
+    }
+
+
+    /**
+     * Method to find the user (with filter)
+     * @return array(User)
+    */
+    public static function find($id = null, $me = null, $email = null,$q = null){
+
+        if (!self::connectDB()) return null;
+        $users = null;
+        $query = User::QUERY_FIND;
+
+        $dinParams = [];
+        $where = "";
+
+        if ($id){
+            if ($where) $where.= " AND ";
+            $where.= "U.ID=?";
+            $dinParams[] = self::getBindParam("i",$id);
+        }
+
+        if ($me){
+            if ($where) $where.= " AND ";
+            $where.= "U.ID!=?";
+            $dinParams[] = self::getBindParam("i",$me);
+        }
+
+        if ($email){
+            if ($where) $where.= " AND ";
+            $where.= "U.CORREO=?";
+            $dinParams[] = self::getBindParam("s",$email);
+        }
+
+
+        if ($q){
+            if ($where) $where.= " AND ";
+            if (\StringValidator::isInteger($q)) {
+                $where.= "U.ID LIKE ?";
+                $dinParams[] = self::getBindParam("i","%$q%");
+            }else{
+                $where.= "(U.NOMBRE_COMPLETO LIKE ? OR U.CORREO LIKE ?)";
+                $dinParams[] = self::getBindParam("i","%$q%");
+                $dinParams[] = self::getBindParam("i","%$q%");
+            }
+        }
+
+
+        if ($where) $query.= " WHERE $where";
+        $query = User::formatQuery($query);
+        
+        if (!$result = self::$dbManager->query($query)) return $users;
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return $users;
+
+        $users = User::mappingFromDBResult($result);
+
+        return $users;
+    }
+
 	
 	/**
 	 * Method to make login to the system
@@ -120,13 +191,8 @@ class User extends Model{
 	 * Method to generate the verification code
 	 */
 	private function generateVerificationCode($admin = false){
-		if ($admin){
-			if (!$this->email || !$this->password) return false;
-			$this->verCode = base64_encode(base64_encode($this->email) . "|||" . $this->password);
-		}else {
-			if (!$this->email || !$this->password || !$this->productType || !$this->productType->id) return false;
-			$this->verCode = base64_encode(base64_encode($this->email) . "|||" . $this->password . "|||" . base64_encode($this->productType->id));
-		}
+        if (!$this->correo || !$this->clave || !$this->role) return false;
+        $this->verCode = base64_encode(base64_encode($this->email) . "|||" . $this->password) . "|||"  . base64_encode($this->role->getId());
 		return true;
 	}
 	
@@ -155,5 +221,104 @@ class User extends Model{
         return $result;
 	}
 
+    /**
+     * Method to add an user
+     * @return boolean if the user is added
+    */
+    public function add(){
+        if (!self::connectDB()) return null;
+
+        $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
+        $this->role = new Role(Role::ROLE_REPORT);
+        $this->clave = User::cryptPassword($this->clave);
+
+        $query = "INSERT INTO usuario_aplicacion(CORREO, CLAVE, NOMBRE_COMPLETO, ROLE_ID, ESTATUS) VALUES (?,?,?,?,?)";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+
+        $dinParams = [];
+        $dinParams[] = self::getBindParam("s",$this->correo);
+        $dinParams[] = self::getBindParam("s",$this->clave);
+        $dinParams[] = self::getBindParam("s",$this->nombreCompleto);
+        $dinParams[] = self::getBindParam("i",$this->role->getId());
+        $dinParams[] = self::getBindParam("i",$this->estatus->getId());
+
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        return $result->affected_rows > 0;
+    }
+
+
+    /**
+     * Method to update an user
+     * @return boolean if the user is updated
+     */
+    public function update(){
+        if (!self::connectDB()) return null;
+
+        $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
+        $this->role = new Role(Role::ROLE_REPORT);
+        $query = "UPDATE usuario_aplicacion SET NOMBRE_COMPLETO=? WHERE ID=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+
+        $dinParams = [];
+        $dinParams[] = self::getBindParam("s",$this->nombreCompleto);
+        $dinParams[] = self::getBindParam("i",$this->id);
+
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        return true;
+
+    }
+
+    /**
+     * Method to remove an user
+     * @return boolean if the user is removed
+     */
+    public function remove(){
+        if (!self::connectDB()) return null;
+
+        $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
+        $this->role = new Role(Role::ROLE_REPORT);
+        $query = "UPDATE usuario_aplicacion SET ESTATUS=? WHERE ID=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+
+        $dinParams = [];
+        $dinParams[] = self::getBindParam("i",$this->estatus->getId());
+        $dinParams[] = self::getBindParam("i",$this->id);
+
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        return true;
+    }
+
+
+    /**
+     * Method to remove an user
+     * @return boolean if the user is removed
+     */
+    public function changePassword(){
+        if (!self::connectDB()) return null;
+
+        $query = "UPDATE usuario_aplicacion SET CLAVE=? WHERE ID=?";
+        $query = self::formatQuery($query);
+        if (!$result = self::$dbManager->query($query)) return null;
+
+        $this->clave = User::cryptPassword($this->clave);
+
+        $dinParams = [];
+        $dinParams[] = self::getBindParam("s",$this->clave);
+        $dinParams[] = self::getBindParam("i",$this->id);
+
+        self::bindDinParam($result,$dinParams);
+        if (!self::$dbManager->executeSql($result)) return null;
+
+        return true;
+    }
 }
 

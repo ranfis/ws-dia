@@ -8,6 +8,7 @@ require_once("models/institucion.php");
 require_once("models/unidadEjecutora.php");
 require_once("models/proyecto.php");
 require_once("models/moneda.php");
+require_once("models/user.php");
 require_once("core/ReportFileManager.php");
 
 $app->options('/(:name+)', function() use ($app) {
@@ -1111,5 +1112,120 @@ $app->get(\Config\Routes::CURRENT_STATUS_LIST,function() use ($app,$param){
         $statuses[] = $status->toArray();
 
     $ws->result = $statuses;
+    echo $ws->output($app);
+});
+
+
+$app->get(\Config\Routes::ADM_USER_LIST,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    $param = $_GET;
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
+    $userSession = \Core\SessionManager::getUser();
+    $q = isset($param['q']) ? $param['q'] : null;
+    $userSession = \Core\SessionManager::getUser();
+    $users = \Model\User::find(null,$userSession->id,null,$q);
+    $ws->result= $users;
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getUser();
+
+    $correo     = isset($param['email'])   ? $param['email']  : null;
+    $clave      = isset($param['password'])    ? $param['password']   : null;
+    $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
+
+    if ($correo === null || !$correo) $ws->generate_error(01,"El correo es requerido");
+    else if (!StringValidator::isEmail($correo)) $ws->generate_error(01,"El correo es inv&aacute;lido");
+    else if ($clave === null || !$clave) $ws->generate_error(01,"La clave de acceso es requerido");
+    else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
+    else if ($user = \Model\User::findByEmail($correo,$userSession->id)) $ws->generate_error(01,"Existe un usuario registrado con este correo");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $user = new \Model\User(null,$correo,$clave);
+    $user->nombreCompleto = $nombre;
+
+    if (!$user->add()) $ws->generate_error(01,"Error agregando el usuario");
+
+    echo $ws->output($app);
+});
+
+$app->post(\Config\Routes::ADM_USER_UPDATE,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getUser();
+
+    $id         = isset($param['id']) ? $param['id'] : null;
+    $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
+
+    if ($id === null || !$id) $ws->generate_error(01,"El ID del usuario es requerido");
+    else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
+    else if ($id == $userSession->id) $ws->generate_error(01,"No puede actualizar los datos de su mismo usuario");
+    else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $user->nombreCompleto = $nombre;
+
+    if (!$user->update()){
+        $ws->generate_error(01,"Error actualizando el usuario");
+    }
+
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::ADM_USER_DEL,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getUser();
+    $id = isset($param['id']) ? $param['id'] : null;
+    if ($id == $userSession->id) $ws->generate_error(01,"No puede remover su mismo usuario");
+    else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    if (!$user->remove()){
+        $ws->generate_error(01,"Error eliminando el usuario");
+    }
+
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::ADM_USER_CHANGE_PASSWORD,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getUser();
+    $id = isset($param['id']) ? $param['id'] : null;
+    if ($id == $userSession->id) $ws->generate_error(01,"No puede cambiar la contraseña a su mismo usuario");
+    else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    if (!$user->changePassword()){
+        $ws->generate_error(01,"Error cambiando la contraseña del usuario");
+    }
+
     echo $ws->output($app);
 });

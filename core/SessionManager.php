@@ -2,6 +2,7 @@
 namespace Core;
 
 use Model\Session;
+use Model\User;
 
 class SessionManager{
 
@@ -11,6 +12,10 @@ class SessionManager{
 
     private static $user;
 
+
+    /**
+     * @return User
+    */
     public static function getUser(){
         return self::$user;
     }
