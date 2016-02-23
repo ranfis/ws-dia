@@ -100,7 +100,7 @@ class User extends Model{
 
         if ($where) $query.= " WHERE $where";
         $query = User::formatQuery($query);
-        
+
         if (!$result = self::$dbManager->query($query)) return $users;
         self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return $users;
@@ -246,7 +246,9 @@ class User extends Model{
         self::bindDinParam($result,$dinParams);
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        $ret = $result->affected_rows > 0;
+        if ($ret) $this->id = $result->insert_id;
+        return $ret;
     }
 
 

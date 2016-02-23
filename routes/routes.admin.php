@@ -1154,6 +1154,11 @@ $app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
     $user->nombreCompleto = $nombre;
 
     if (!$user->add()) $ws->generate_error(01,"Error agregando el usuario");
+    else{
+        $result = [];
+        $result['id'] = $user->id;
+        $ws->result = $result;
+    }
 
     echo $ws->output($app);
 });
