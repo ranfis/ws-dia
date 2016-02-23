@@ -29,7 +29,7 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
 
     $year = isset($param['year']) ? $param['year'] : null;
 
-    $projects = \Model\Proyecto::find(null,null,null,null,$year,null,\Model\EstatusAplicacion::ESTATUS_APP_RECHAZADA);
+    $projects = \Model\Proyecto::find(null,null,\Model\EstatusAplicacion::ESTATUS_APP_ACEPTADA,null,$year);
 
     $rows= [];
 
@@ -74,7 +74,7 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
 
     $year = isset($param['year']) ? $param['year'] : null;
 
-    $projects = \Model\Proyecto::find(null,null,null,null,$year,null,\Model\EstatusAplicacion::ESTATUS_APP_RECHAZADA);
+    $projects = \Model\Proyecto::find(null,null,\Model\EstatusAplicacion::ESTATUS_APP_ACEPTADA,null,$year);
 
     $rows= [];
 
@@ -119,7 +119,7 @@ $app->get("/report/projects/earnings/total-amount-overhead/:s",function($session
 
     $year = isset($param['year']) ? $param['year'] : null;
 
-    $projects = \Model\Proyecto::find(null,null,null,null,$year);
+    $projects = \Model\Proyecto::find(null,null,\Model\EstatusAplicacion::ESTATUS_APP_ACEPTADA,null,$year);
 
     $rows= [];
 

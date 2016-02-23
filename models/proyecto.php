@@ -462,7 +462,7 @@ class Proyecto extends Model{
      * Method to find the revista publicacion
      * @return array(Proyecto)
      */
-    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$year = null,$investigador = null,$not_estadoAplicacion){
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$year = null,$investigador = null,$not_estadoAplicacion = null){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
