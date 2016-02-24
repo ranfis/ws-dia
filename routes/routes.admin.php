@@ -1122,7 +1122,7 @@ $app->get(\Config\Routes::ADM_USER_LIST,function() use ($app,$param){
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
     $userSession = \Core\SessionManager::getUser();
     $q = isset($param['q']) ? $param['q'] : null;
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
     $users = \Model\User::find(null,$userSession->id,null,$q);
     $ws->result= $users;
     echo $ws->output($app);
@@ -1138,11 +1138,14 @@ $app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
     $correo     = isset($param['email'])   ? $param['email']  : null;
     $clave      = isset($param['password'])    ? $param['password']   : null;
     $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
+    $role       = isset($param['role'])   ? $param['role']  : null;
 
     if ($correo === null || !$correo) $ws->generate_error(01,"El correo es requerido");
     else if (!StringValidator::isEmail($correo)) $ws->generate_error(01,"El correo es inv&aacute;lido");
     else if ($clave === null || !$clave) $ws->generate_error(01,"La clave de acceso es requerido");
     else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
+    else if ($role === null || !$role) $ws->generate_error(01,"El role es requerido");
+    else if (!StringValidator::isInteger($role)) $ws->generate_error(01,"El role es inv&aacute;lido");
     else if ($user = \Model\User::findByEmail($correo,$userSession->id)) $ws->generate_error(01,"Existe un usuario registrado con este correo");
 
     if ($ws->error){
@@ -1151,6 +1154,7 @@ $app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
     }
 
     $user = new \Model\User(null,$correo,$clave);
+    $user->setRole(new \Model\Role($role));
     $user->nombreCompleto = $nombre;
 
     if (!$user->add()) $ws->generate_error(01,"Error agregando el usuario");
@@ -1171,9 +1175,12 @@ $app->post(\Config\Routes::ADM_USER_UPDATE,function() use ($app,$param){
 
     $id         = isset($param['id']) ? $param['id'] : null;
     $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
+    $role     = isset($param['role'])   ? $param['role']  : null;
 
     if ($id === null || !$id) $ws->generate_error(01,"El ID del usuario es requerido");
     else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
+    else if ($role === null || !$role) $ws->generate_error(01,"El role es requerido");
+    else if (!StringValidator::isInteger($role)) $ws->generate_error(01,"El role es inv&aacute;lido");
     else if ($id == $userSession->id) $ws->generate_error(01,"No puede actualizar los datos de su mismo usuario");
     else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
 

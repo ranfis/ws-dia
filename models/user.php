@@ -21,6 +21,24 @@ class User extends Model{
     //@var Role
     private $role;
 
+    /**
+     * @param Role $role
+     */
+    public function setRole($role)
+    {
+        $this->role = $role;
+    }
+
+    /**
+     * @return Role
+     */
+    public function getRole()
+    {
+        return $this->role;
+    }
+
+
+
 	public function __construct($id= null,$correo = null,$clave = null){
         $this->id       = $id;
         $this->correo   = $correo;
@@ -97,9 +115,9 @@ class User extends Model{
             }
         }
 
-
         if ($where) $query.= " WHERE $where";
         $query = User::formatQuery($query);
+
 
         if (!$result = self::$dbManager->query($query)) return $users;
         self::bindDinParam($result,$dinParams);
@@ -229,7 +247,6 @@ class User extends Model{
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
-        $this->role = new Role(Role::ROLE_REPORT);
         $this->clave = User::cryptPassword($this->clave);
 
         $query = "INSERT INTO usuario_aplicacion(CORREO, CLAVE, NOMBRE_COMPLETO, ROLE_ID, ESTATUS) VALUES (?,?,?,?,?)";
@@ -261,12 +278,13 @@ class User extends Model{
 
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
         $this->role = new Role(Role::ROLE_REPORT);
-        $query = "UPDATE usuario_aplicacion SET NOMBRE_COMPLETO=? WHERE ID=?";
+        $query = "UPDATE usuario_aplicacion SET NOMBRE_COMPLETO=?,ROLE_ID=? WHERE ID=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
 
         $dinParams = [];
         $dinParams[] = self::getBindParam("s",$this->nombreCompleto);
+        $dinParams[] = self::getBindParam("i",$this->getRole()->getId());
         $dinParams[] = self::getBindParam("i",$this->id);
 
         self::bindDinParam($result,$dinParams);

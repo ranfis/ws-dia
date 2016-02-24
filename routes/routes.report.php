@@ -20,7 +20,7 @@ function validateSessionFile($param){
 }
 
 
-$app->get(Routes::REPORT_PROJECTS_EARNINGS,function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_EARNINGS,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -158,7 +158,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_TOTALAMOUNT,function($sessionId) use($a
 });
 
 
-$app->get(Routes::REPORT_PROJECTS_QUANTITY,function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_QUANTITY,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -233,7 +233,7 @@ $app->get(\Config\Routes::REPORT_PUBLICATIONS,function($sessionId) use($app,$par
     $filename = $report->generateFile();
 });
 
-$app->get(Routes::REPORT_CONGRESS,function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_CONGRESS,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
