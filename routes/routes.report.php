@@ -20,7 +20,7 @@ function validateSessionFile($param){
 }
 
 
-$app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_EARNINGS,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -65,7 +65,7 @@ $app->get("/report/projects/earnings/:s",function($sessionId) use($app,$param){
 });
 
 
-$app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_OVERHEAD,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -110,7 +110,7 @@ $app->get("/report/projects/earnings/overhead/:s",function($sessionId) use($app,
 });
 
 
-$app->get("/report/projects/earnings/total-amount-overhead/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_TOTALAMOUNT,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -158,7 +158,7 @@ $app->get("/report/projects/earnings/total-amount-overhead/:s",function($session
 });
 
 
-$app->get("/report/projects/quantity/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT_QUANTITY,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -189,7 +189,7 @@ $app->get("/report/projects/quantity/:s",function($sessionId) use($app,$param){
 });
 
 
-$app->get("/report/publications/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PUBLICATIONS,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -233,7 +233,7 @@ $app->get("/report/publications/:s",function($sessionId) use($app,$param){
     $filename = $report->generateFile();
 });
 
-$app->get("/report/congress/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_CONGRESS,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -278,7 +278,7 @@ $app->get("/report/congress/:s",function($sessionId) use($app,$param){
 });
 
 
-$app->get("/report/projects/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
@@ -378,7 +378,7 @@ $app->get("/report/projects/:s",function($sessionId) use($app,$param){
     $filename = $report->generateFile();
 });
 
-$app->get("/report/annual/:s",function($sessionId) use($app,$param){
+$app->get(\Config\Routes::REPORT_ANNUAL,function($sessionId) use($app,$param){
     $param = $_GET ? $_GET : [];
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;

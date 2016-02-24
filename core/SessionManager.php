@@ -24,6 +24,9 @@ class SessionManager{
         self::$user = $user;
     }
 
+    /**
+     * @return Session
+    */
     public static function getSession(){
         return self::$session;
     }

@@ -15,6 +15,8 @@ class Session extends Model{
 	public $opcionAdicional;
 	public $fechaExpiracion;
 	public $fechaCreacion;
+
+    //@var User
 	public $user;
 
 

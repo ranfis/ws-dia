@@ -121,5 +121,15 @@ class Routes{
 
     //GET
     const CURRENT_STATUS_LIST       = "/project/current_status/list";
+
+
+    const REPORT_PROJECT_EARNINGS    = "/report/projects/earnings/:s";
+    const REPORT_PROJECT_OVERHEAD    = "/report/projects/earnings/overhead/:s";
+    const REPORT_PROJECT_TOTALAMOUNT = "/report/projects/earnings/total-amount-overhead/:s";
+    const REPORT_PROJECT_QUANTITY    = "/report/projects/quantity/:s";
+    const REPORT_PUBLICATIONS        = "/report/publications/:s";
+    const REPORT_CONGRESS            = "/report/congress/:s";
+    const REPORT_PROJECT             = "/report/projects/:s";
+    const REPORT_ANNUAL              = "/report/annual/:s";
 }
 

@@ -1,6 +1,9 @@
 <?php
 namespace Core;
 
+use Model\Role;
+use Model\User;
+
 require "core/SessionManager.php";
     
 class Webservice{
@@ -70,11 +73,33 @@ class Webservice{
                 return false;
             }
 
+
             if (!SessionManager::hasSessionExpired($this->param[self::PARAM_SESSIONID])){
                 $this->generate_error(6,"Sesi&oacute;n expirada");
                 echo $this->output($app);
                 return false;
             }
+
+            $user = SessionManager::getSession()->user;
+
+            if (!$user){
+                $this->generate_error(01,"Usuario no Encontrado");
+                echo $this->output($app);
+                return false;
+            }
+
+            //method to verify the privileges
+            $resource = $app->request->getPathinfo();
+
+
+            if (!Role::hasPermission($resource,$user->getRole()->getId())){
+                $this->generate_error(02,"No tiene permiso suficiente para acceder a este m&oacute;dulo");
+                echo $this->output($app);
+                return false;
+            }
+            //end: method to verify the privileges
+
+
         }
         return true;
     }
