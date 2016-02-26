@@ -278,7 +278,7 @@ class User extends Model{
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
-        $this->clave = User::cryptPassword($this->clave);
+        $this->clave = User::cryptPassword($this->c lave);
 
         $query = "INSERT INTO usuario_aplicacion(CORREO, CLAVE, NOMBRE_COMPLETO, ROLE_ID, ESTATUS) VALUES (?,?,?,?,?)";
         $query = self::formatQuery($query);
@@ -308,8 +308,6 @@ class User extends Model{
         if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
-        $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
-        $this->role = new Role(Role::ROLE_REPORT);
         $query = "UPDATE usuario_aplicacion SET NOMBRE_COMPLETO=?,ROLE_ID=? WHERE ID=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
@@ -335,7 +333,6 @@ class User extends Model{
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
-        $this->role = new Role(Role::ROLE_REPORT);
         $query = "UPDATE usuario_aplicacion SET ESTATUS=? WHERE ID=?";
         $query = self::formatQuery($query);
         if (!$result = self::$dbManager->query($query)) return null;
