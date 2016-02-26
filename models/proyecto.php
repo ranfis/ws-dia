@@ -765,7 +765,7 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->getEstatusActual()->getId());
         $dinParams[] = self::getBindParam("i",$this->getEstatusAplicacion()->getId());
         $dinParams[] = self::getBindParam("d",$this->contraPartida);
-        $dinParams[] = self::getBindParam("d",$this->aporte);
+        $dinParams[] = self::getBindParam("s",$this->aporte);
         $dinParams[] = self::getBindParam("i",$this->getMoneda() ? $this->getMoneda()->getId() : null);
         $dinParams[] = self::getBindParam("d",$this->getMontoTotal());
         $dinParams[] = self::getBindParam("d",$this->getOverhead());
