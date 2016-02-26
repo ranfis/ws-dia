@@ -1149,6 +1149,7 @@ $app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
     if ($correo === null || !$correo) $ws->generate_error(01,"El correo es requerido");
     else if (!StringValidator::isEmail($correo)) $ws->generate_error(01,"El correo es inv&aacute;lido");
     else if ($clave === null || !$clave) $ws->generate_error(01,"La clave de acceso es requerido");
+    else if (!StringValidator::isPassword($clave)) $ws->generate_error(01,"La clave es inv&aacute;lida. Cantidad m&iacute;nima de caracteres: 6");
     else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
     else if ($role === null || !$role) $ws->generate_error(01,"El role es requerido");
     else if (!StringValidator::isInteger($role)) $ws->generate_error(01,"El role es inv&aacute;lido");
