@@ -18,7 +18,7 @@ Web service para el proyecto del gestor de proyecto del  Departamento de Investi
 
 ### Requerimientos del Sistema
 
-* You need **PHP >= 5.3.0**.
+* You need **PHP >= 5.5.0**.
 * **MySQL >= 5.6
 * Apache
 

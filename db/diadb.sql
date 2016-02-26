@@ -576,6 +576,16 @@ ALTER TABLE `usuario_aplicacion`
   ADD CONSTRAINT `usuario_aplicacion_ibfk_1` FOREIGN KEY (`ROLE_ID`) REFERENCES `role` (`ID`),
   ADD CONSTRAINT `usuario_aplicacion_ibfk_2` FOREIGN KEY (`ESTATUS`) REFERENCES `estatus` (`ID`);
 
+ALTER TABLE  `usuario_aplicacion` CHANGE  `FECHA_CREACION`  `FECHA_CREACION` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'fecha de creación del usuario';
+UPDATE  `role` SET  `NOMBRE` =  'SUPER-ADMIN' WHERE  `role`.`ID` =1;
+UPDATE  `diadb`.`role` SET  `NOMBRE` =  'ADMIN' WHERE  `role`.`ID` =2;
+INSERT INTO `diadb`.`role` (`ID`, `NOMBRE`) VALUES (NULL, 'REPORT');
+UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '1' WHERE  EMAIL="diaprincipal1@unibe.edu.do";
+UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  EMAIL="diaprincipal2@unibe.edu.do";
+UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  EMAIL="diaprincipal3@unibe.edu.do";
+UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '3' WHERE  EMAIL="diaprincipal4@unibe.edu.do";
+
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
