@@ -256,7 +256,7 @@ class User extends Model{
 
         $result['correo']  = $this->correo;
         $result['nombre_completo']  = $this->nombreCompleto;
-        $result['role'] = [
+        $result['rol'] = [
             "id"=> $this->role->getId(),
             "name"=>$this->role->getName()
         ];
