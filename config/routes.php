@@ -6,6 +6,9 @@ class Routes{
     const USER_SUMMARY          = "/summary";
     const USER_LOGOUT           = "/logout";
 
+    const PROFILE_CHANGE_PASSWORD = "/profile/change_password";
+    const PROFILE_UPDATE_INFO     = "/profile/update_info";
+
 
     const ADM_USER_ADD          = "/user/add";
     const ADM_USER_UPDATE       = "/user/update";

@@ -70,6 +70,8 @@ class Role extends Model{
         $privileges[Routes::USER_SUMMARY]   = $allRoles;
         $privileges[Routes::USER_LOGOUT]    = $allRoles;
 
+        $privileges[Routes::PROFILE_CHANGE_PASSWORD]   = $allRoles;
+        $privileges[Routes::PROFILE_UPDATE_INFO]    = $allRoles;
 
         $privileges[Routes::ADM_USER_ADD]                   = [Role::ROLE_SUPERADMIN];
         $privileges[Routes::ADM_USER_UPDATE]                = [Role::ROLE_SUPERADMIN];
@@ -88,7 +90,7 @@ class Role extends Model{
 
         $privileges[Routes::PARTICIPANTS_ADD]       = $adminRoles;
         $privileges[Routes::PARTICIPANTS_UPDATE]    = $adminRoles;
-        $privileges[Routes::PARTICIPANTS_LIST]      = $adminRoles;
+        $privileges[Routes::PARTICIPANTS_LIST]      = $allRoles;
         $privileges[Routes::PARTICIPANTS_DEL]       = $adminRoles;
 
         $privileges[Routes::CONGRESS_ADD]       = $adminRoles;

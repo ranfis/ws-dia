@@ -1120,11 +1120,17 @@ $app->get(\Config\Routes::ADM_USER_LIST,function() use ($app,$param){
     $ws = new \Core\Webservice();
     $param = $_GET;
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
     $q = isset($param['q']) ? $param['q'] : null;
     $userSession = \Core\SessionManager::getSession()->user;
     $users = \Model\User::find(null,$userSession->id,null,$q);
-    $ws->result= $users;
+
+
+    $result = [];
+    foreach($users as $user){
+        $result[] = $user->toJson();
+    }
+    $ws->result= $result;
     echo $ws->output($app);
 });
 
@@ -1133,12 +1139,12 @@ $app->post(\Config\Routes::ADM_USER_ADD,function() use ($app,$param){
     $ws = new \Core\Webservice();
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
 
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
 
-    $correo     = isset($param['email'])   ? $param['email']  : null;
-    $clave      = isset($param['password'])    ? $param['password']   : null;
-    $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
-    $role       = isset($param['role'])   ? $param['role']  : null;
+    $correo     = isset($param['correo'])   ? $param['correo']  : null;
+    $clave      = isset($param['clave'])    ? $param['clave']   : null;
+    $nombre     = isset($param['nombre_completo'])   ? $param['nombre_completo']  : null;
+    $role       = isset($param['rol'])   ? $param['rol']  : null;
 
     if ($correo === null || !$correo) $ws->generate_error(01,"El correo es requerido");
     else if (!StringValidator::isEmail($correo)) $ws->generate_error(01,"El correo es inv&aacute;lido");
@@ -1171,11 +1177,11 @@ $app->post(\Config\Routes::ADM_USER_UPDATE,function() use ($app,$param){
     $ws = new \Core\Webservice();
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
 
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
 
     $id         = isset($param['id']) ? $param['id'] : null;
-    $nombre     = isset($param['fullname'])   ? $param['fullname']  : null;
-    $role     = isset($param['role'])   ? $param['role']  : null;
+    $nombre     = isset($param['nombre_completo'])   ? $param['nombre_completo']  : null;
+    $role     = isset($param['rol'])   ? $param['rol']  : null;
 
     if ($id === null || !$id) $ws->generate_error(01,"El ID del usuario es requerido");
     else if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
@@ -1190,7 +1196,7 @@ $app->post(\Config\Routes::ADM_USER_UPDATE,function() use ($app,$param){
     }
 
     $user->nombreCompleto = $nombre;
-
+    $user->setRole(new \Model\Role($role));
     if (!$user->update()){
         $ws->generate_error(01,"Error actualizando el usuario");
     }
@@ -1203,7 +1209,7 @@ $app->post(\Config\Routes::ADM_USER_DEL,function() use ($app,$param){
     $ws = new \Core\Webservice();
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
 
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
     $id = isset($param['id']) ? $param['id'] : null;
     if ($id == $userSession->id) $ws->generate_error(01,"No puede remover su mismo usuario");
     else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
@@ -1225,9 +1231,14 @@ $app->post(\Config\Routes::ADM_USER_CHANGE_PASSWORD,function() use ($app,$param)
     $ws = new \Core\Webservice();
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
 
-    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Core\SessionManager::getSession()->user;
     $id = isset($param['id']) ? $param['id'] : null;
+    $password = isset($param['clave']) ? $param['clave'] : null;
+
+
     if ($id == $userSession->id) $ws->generate_error(01,"No puede cambiar la contraseña a su mismo usuario");
+    else if ($password === null || !$password) $ws->generate_error(01,"La nueva clave es requerida");
+    else if (!StringValidator::isPassword($password)) $ws->generate_error(01,"La clave es inv&aacute;lida. Cantidad m&iacute;nima de caracteres: 6");
     else if (!$user = \Model\User::findById($id,$userSession->id)) $ws->generate_error(01,"Usuario no encontrado");
 
     if ($ws->error){
@@ -1235,6 +1246,7 @@ $app->post(\Config\Routes::ADM_USER_CHANGE_PASSWORD,function() use ($app,$param)
         return;
     }
 
+    $user->setClave($password);
     if (!$user->changePassword()){
         $ws->generate_error(01,"Error cambiando la contraseña del usuario");
     }

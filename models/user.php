@@ -1,5 +1,7 @@
 <?php
 namespace Model;
+use Config\Config;
+
 require_once("models/model.php");
 require_once("models/role.php");
 
@@ -29,6 +31,11 @@ class User extends Model{
         $this->role = $role;
     }
 
+
+
+    public function setClave($clave){
+        $this->clave = $clave;
+    }
     /**
      * @return Role
      */
@@ -75,7 +82,7 @@ class User extends Model{
      * Method to find the user (with filter)
      * @return array(User)
     */
-    public static function find($id = null, $me = null, $email = null,$q = null){
+    public static function find($id = null, $me = null, $email = null,$q = null,$status = 1){
 
         if (!self::connectDB()) return null;
         $users = null;
@@ -115,6 +122,13 @@ class User extends Model{
             }
         }
 
+        if ($status){
+            if ($where) $where.= " AND ";
+            $where.= "U.ESTATUS=?";
+            $dinParams[] = self::getBindParam("i",$status);
+        }
+
+
         if ($where) $query.= " WHERE $where";
         $query = User::formatQuery($query);
 
@@ -126,6 +140,14 @@ class User extends Model{
         $users = User::mappingFromDBResult($result);
 
         return $users;
+    }
+
+
+    /**
+     * Method to validate a password
+    */
+    public function verifyPasword($password){
+        return password_verify($password,$this->clave);
     }
 
 	
@@ -180,7 +202,10 @@ class User extends Model{
             $user->role = new Role($bindResult['role_id'],$bindResult['role_name']);
 			$users[] = $user;
 		}
-		
+
+
+
+
 		return $users;
 	}
 	
@@ -229,12 +254,18 @@ class User extends Model{
         public $fechaLogin;
         public $fechaCreacion;*/
 
-        $result['email']  = $this->correo;
+        $result['correo']  = $this->correo;
         $result['nombre_completo']  = $this->nombreCompleto;
         $result['role'] = [
             "id"=> $this->role->getId(),
             "name"=>$this->role->getName()
         ];
+
+        $result['fecha_login'] =null;
+        if ($this->fechaLogin)
+            $result['fecha_login'] = date(Config::$formatDate,strtotime($this->fechaLogin));
+        $result['fecha_creacion'] = date(Config::$formatDate,strtotime($this->fechaCreacion));
+
 
         return $result;
 	}
@@ -274,6 +305,7 @@ class User extends Model{
      * @return boolean if the user is updated
      */
     public function update(){
+        if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
@@ -299,6 +331,7 @@ class User extends Model{
      * @return boolean if the user is removed
      */
     public function remove(){
+        if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_REMOVED);
@@ -323,6 +356,7 @@ class User extends Model{
      * @return boolean if the user is removed
      */
     public function changePassword(){
+        if (!$this->id) return null;
         if (!self::connectDB()) return null;
 
         $query = "UPDATE usuario_aplicacion SET CLAVE=? WHERE ID=?";

@@ -43,3 +43,53 @@ $app->post(Config\Routes::USER_LOGIN,function() use ($app,$param){
 
     echo $ws->output($app);
 });
+
+$app->post(\Config\Routes::PROFILE_UPDATE_INFO,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getSession()->user;
+    $nombre     = isset($param['nombre_completo'])   ? $param['nombre_completo']  : null;
+
+    if ($nombre === null || !$nombre) $ws->generate_error(01,"El nombre es requerido");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $userSession->nombreCompleto = $nombre;
+
+    if (!$userSession->update()){
+        $ws->generate_error(01,"Error actualizando el perfil");
+    }
+    echo $ws->output($app);
+});
+
+
+$app->post(\Config\Routes::PROFILE_CHANGE_PASSWORD,function() use ($app,$param){
+    $ws = new \Core\Webservice();
+    if (!$ws->prepareRequest(\Core\Webservice::METHOD_POST,$param,$app)) return null;
+
+    $userSession = \Core\SessionManager::getSession()->user;
+
+    $currentPassword=  isset($param['clave_actual']) ? $param['clave_actual'] : null;
+    $password = isset($param['clave']) ? $param['clave'] : null;
+
+    if ($currentPassword === null || !$currentPassword) $ws->generate_error(01,"La clave actual es requerida");
+    else if (!$userSession->verifyPasword($currentPassword)) $ws->generate_error(01,"Clave actual incorrecta, favor de verificar");
+    else if ($password === null || !$password) $ws->generate_error(01,"La nueva clave es requerida");
+    else if (!StringValidator::isPassword($password)) $ws->generate_error(01,"La clave es inv&aacute;lida. Cantidad m&iacute;nima de caracteres: 6");
+
+    if ($ws->error){
+        echo $ws->output($app);
+        return;
+    }
+
+    $userSession->setClave($password);
+    if (!$userSession->changePassword()){
+        $ws->generate_error(01,"Error cambiando la contraseña");
+    }
+
+    echo $ws->output($app);
+});
