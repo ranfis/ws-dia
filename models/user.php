@@ -254,6 +254,7 @@ class User extends Model{
         public $fechaLogin;
         public $fechaCreacion;*/
 
+        $result['id'] = $this->id;
         $result['correo']  = $this->correo;
         $result['nombre_completo']  = $this->nombreCompleto;
         $result['rol'] = [
