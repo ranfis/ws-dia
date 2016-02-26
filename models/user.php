@@ -278,7 +278,7 @@ class User extends Model{
         if (!self::connectDB()) return null;
 
         $this->estatus = new Estatus(Estatus::ESTATUS_ACTIVED);
-        $this->clave = User::cryptPassword($this->c lave);
+        $this->clave = User::cryptPassword($this->clave);
 
         $query = "INSERT INTO usuario_aplicacion(CORREO, CLAVE, NOMBRE_COMPLETO, ROLE_ID, ESTATUS) VALUES (?,?,?,?,?)";
         $query = self::formatQuery($query);
