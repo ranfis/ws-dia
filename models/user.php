@@ -117,8 +117,8 @@ class User extends Model{
                 $dinParams[] = self::getBindParam("i","%$q%");
             }else{
                 $where.= "(U.NOMBRE_COMPLETO LIKE ? OR U.CORREO LIKE ?)";
-                $dinParams[] = self::getBindParam("i","%$q%");
-                $dinParams[] = self::getBindParam("i","%$q%");
+                $dinParams[] = self::getBindParam("s","%$q%");
+                $dinParams[] = self::getBindParam("s","%$q%");
             }
         }
 
