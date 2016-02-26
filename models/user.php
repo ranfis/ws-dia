@@ -68,8 +68,8 @@ class User extends Model{
      * Method to get the user by id
      * @return User
      */
-    public static function findByEmail($email,$me = null){
-        $users = self::find(null,$me,$email);
+    public static function findByEmail($email,$me = null,$status = null){
+        $users = self::find(null,$me,$email,null,$status);
 
         $user = null;
         if (is_array($users) && count($users) == 1)
