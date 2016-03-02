@@ -12,8 +12,8 @@ class Config{
 	public static $db_port = "3301";
 	public static $db_name = "diadb";
 	public static $db_prefTable = "";
-	public static $db_user = "dia_db_user";
-	public static $db_passwd = "diadb_pass_2015";
+	public static $db_user = "diadbuser";
+	public static $db_passwd = "D1aDbUs3r2016**";
 	
 	public static $param_session_id = "SESSION_ID";
 
