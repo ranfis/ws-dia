@@ -836,6 +836,11 @@ $app->get(\Config\Routes::CURRENCY_GET, function() use($app,$param){
 });
 
 function validateProject(&$ws,&$app,&$param,$update = false){
+
+    $userSession = \Core\SessionManager::getUser();
+    $userSession = \Model\User::findById($userSession->id);
+
+
     $id                 = isset($param['id']) ? $param['id'] : null;
     $descripcion        = isset($param['description']) ? $param['description'] : null;
     $fechaAplicacion    = isset($param['date_application']) ? $param['date_application'] : null;
@@ -890,6 +895,7 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     else if ($fondos && (!is_array($fondos) || count($fondos) == 0)) $ws->generate_error(01,"Los fondos son inv&aacute;lidos");
     else if ($unidadesEjecutora && (!is_array($unidadesEjecutora) || count($unidadesEjecutora) == 0)) $ws->generate_error(01,"Las unidades ejecutoras son inv&aacute;lidos");
     else if ($instituciones && (!is_array($instituciones) || count($instituciones) == 0)) $ws->generate_error(01,"Las instituciones son inv&aacute;lidos");
+    else if ($userSession->getRole()->getId() == \Model\Role::ROLE_ADMIN && $esConfidencial) $ws->generate_error(01,"No puede agregar proyectos como confidencia. Acceso Denegado");
 
     if ($ws->error){
         echo $ws->output($app);
