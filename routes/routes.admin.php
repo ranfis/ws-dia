@@ -335,6 +335,10 @@ $app->post(\Config\Routes::PARTICIPANTS_ADD, function() use($param,$app){
 
     if (!$p->add()) $ws->generate_error(01,"Error agregando el participante");
 
+    $result = [];
+    $result['id'] = $p->getId();
+    $ws->result = $result;
+
     echo $ws->output($app);
 });
 

@@ -190,7 +190,9 @@ class Participante extends Model{
         $result->bind_param("ssi",$this->nombre,$this->apellido,$this->getStatus()->getId());
         if (!self::$dbManager->executeSql($result)) return null;
 
-        return $result->affected_rows > 0;
+        $ret = $result->affected_rows > 0;
+        if ($ret) $this->setId($result->insert_id);
+        return $ret;
     }
 
     /**

@@ -715,7 +715,7 @@ class Proyecto extends Model{
 
         $result['ethical_approved_number'] = $this->getNumeroAprobacionEtica();
 
-        $result['is_confidential'] = $this->isConfidencial();
+        $result['is_confidential'] = $this->isConfidencial() ? true : false;
 
         $result['co_researchers'] = [];
         foreach($this->getCoInvestigadores() as $coresearcher)
@@ -757,7 +757,7 @@ class Proyecto extends Model{
 
         DatabaseManager::$link->autocommit(FALSE);
 
-        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, es_confidencial, numero_aprobacion_etica, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
+        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, es_confidencial, numero_aprobacion_etica, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
         $query = self::formatQuery($query);
 
         $dinParams[] = self::getBindParam("s",$this->descripcion);
