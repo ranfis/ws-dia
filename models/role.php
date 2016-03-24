@@ -10,6 +10,8 @@ class Role extends Model{
     const ROLE_SUPERADMIN   = 1;
     const ROLE_ADMIN        = 2;
     const ROLE_REPORT       = 3;
+    const ROLE_ADMIN_CONFIDENTIAL       = 4;
+    const ROLE_REPORT_CONFIDENTIAL      = 3;
 
     private $id;
     private $name;
@@ -62,8 +64,10 @@ class Role extends Model{
 
         $privileges = [];
 
-        $allRoles = [Role::ROLE_SUPERADMIN,Role::ROLE_ADMIN,Role::ROLE_REPORT];
-        $adminRoles = [Role::ROLE_SUPERADMIN,Role::ROLE_ADMIN];
+        $allRoles = [Role::ROLE_SUPERADMIN,Role::ROLE_ADMIN,Role::ROLE_ADMIN_CONFIDENTIAL,Role::ROLE_REPORT,Role::ROLE_REPORT_CONFIDENTIAL];
+
+            $reportRoles = [Role::ROLE_REPORT,Role::ROLE_REPORT_CONFIDENTIAL];
+        $adminRoles = [Role::ROLE_SUPERADMIN,Role::ROLE_ADMIN,Role::ROLE_ADMIN_CONFIDENTIAL];
 
 
         $privileges[Routes::USER_LOGIN]     = $allRoles;
@@ -78,7 +82,6 @@ class Role extends Model{
         $privileges[Routes::ADM_USER_DEL]                   = [Role::ROLE_SUPERADMIN];
         $privileges[Routes::ADM_USER_LIST]                  = [Role::ROLE_SUPERADMIN];
         $privileges[Routes::ADM_USER_CHANGE_PASSWORD]       = [Role::ROLE_SUPERADMIN];
-
 
         $privileges[Routes::DASHBOARD]    = $allRoles;
 

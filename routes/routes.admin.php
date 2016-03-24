@@ -848,6 +848,8 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     $patente            = isset($param['patent']) ? $param['patent'] : null;
     $otroProducto       = isset($param['other_product']) ? $param['other_product'] : null;
     $investigador       = isset($param['researcher']) ? $param['researcher'] : null;
+    $numeroAprobEtica   = isset($param['ethical_approved_number']) ? $param['ethical_approved_number'] : null;
+    $esConfidencial     = isset($param['is_confidential']) && $param['is_confidential'];
 
     $instituciones      = isset($param['institutions']) ? $param['institutions'] : null;
     $unidadesEjecutora  = isset($param['executing_units']) ? $param['executing_units'] : null;
@@ -989,6 +991,9 @@ function validateProject(&$ws,&$app,&$param,$update = false){
     $proyecto = new \Model\Proyecto();
 
     if ($update) $proyecto->setId($id);
+
+    $proyecto->setConfidencial($esConfidencial);
+    $proyecto->setNumeroAprobacionEtica($numeroAprobEtica);
     $proyecto->setDescripcion($descripcion);
     $proyecto->setFechaAplicacion($fechaAplicacion);
     $proyecto->setFechaInicio($fechaInicio);

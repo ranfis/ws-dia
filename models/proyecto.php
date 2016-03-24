@@ -11,7 +11,7 @@ require_once("models/unidadEjecutoraProyecto.php");
 use DatabaseManager;
 
 class Proyecto extends Model{
-    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor,a.NOMBRE 'asesor_nombre',a.APELLIDO 'asesor_apellido', p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id,i.NOMBRE 'investigador_nombre',i.APELLIDO 'investigador_apellido', p.estatus, p.creador, p.fecha_creacion FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual LEFT JOIN moneda m on p.moneda = m.id inner join participante i on p.investigador_id=i.ID LEFT join participante a on p.asesor = a.ID";
+    const QUERY_FIND = "SELECT p.id_proyecto, p.descripcion, p.fecha_aplicacion, p.fecha_inicio, p.asesor,a.NOMBRE 'asesor_nombre',a.APELLIDO 'asesor_apellido', p.id_estado_actual,e.descripcion 'estado_actual', p.id_estado_aplicacion,ea.descripcion 'estado_aplicacion', p.contrapartida_unibe, p.aporte_unibe, p.moneda,m.simbolo \"moneda_simbolo\", p.monto_total, p.overhead_unibe, p.software, p.patente, p.otro_producto, p.investigador_id,i.NOMBRE 'investigador_nombre',i.APELLIDO 'investigador_apellido', p.estatus, p.creador, p.fecha_creacion,p.numero_aprobacion_etica,p.es_confidencial FROM proyecto p inner join estado_aplicacion ea ON p.id_estado_aplicacion = ea.id_estado_aplicacion inner join estado_actual e ON p.id_estado_actual = e.id_estado_actual LEFT JOIN moneda m on p.moneda = m.id inner join participante i on p.investigador_id=i.ID LEFT join participante a on p.asesor = a.ID";
 
     private $id;
     //String
@@ -79,7 +79,18 @@ class Proyecto extends Model{
     private $coInvestigadores;
 
     /**
-     * @return mixed
+     * @var string $numeroAprobacionEtica
+    */
+    private $numeroAprobacionEtica;
+
+    /**
+     * @var boolean $confidencial;
+    */
+    private $confidencial;
+
+
+    /**
+     * @return int
      */
     public function getId()
     {
@@ -87,7 +98,7 @@ class Proyecto extends Model{
     }
 
     /**
-     * @param mixed $id
+     * @param int $id
      */
     public function setId($id)
     {
@@ -447,6 +458,41 @@ class Proyecto extends Model{
     }
 
     /**
+     * @return mixed
+     */
+    public function getNumeroAprobacionEtica()
+    {
+        return $this->numeroAprobacionEtica;
+    }
+
+    /**
+     * @param mixed $numeroAprobacionEtica
+     */
+    public function setNumeroAprobacionEtica($numeroAprobacionEtica)
+    {
+        $this->numeroAprobacionEtica = $numeroAprobacionEtica;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isConfidencial()
+    {
+        return $this->confidencial;
+    }
+
+    /**
+     * @param boolean $confidencial
+     */
+    public function setConfidencial($confidencial)
+    {
+        $this->confidencial = $confidencial;
+    }
+
+
+
+
+    /**
      * @return Proyecto
     */
     public static function findById($id){
@@ -462,14 +508,20 @@ class Proyecto extends Model{
      * Method to find the revista publicacion
      * @return array(Proyecto)
      */
-    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$year = null,$investigador = null,$not_estadoAplicacion = null){
+    public static function find($id = null,$estatusActual = null,$estadoAplicacion = null,$limit = null,$year = null,$investigador = null,$not_estadoAplicacion = null,$isConfidencial = false){
         if (!self::connectDB()) return null;
         $results = [];
         $query = self::QUERY_FIND;
         $dinParams = [];
         $query.= " WHERE p.estatus != ?";
-
         $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
+
+
+        if ($isConfidencial !== null){
+            $query .=" AND p.es_confidencial=?";
+            $dinParams[] = self::getBindParam("i",$$isConfidencial ? 1 : 0);
+        }
+
         if ($id) {
             $query .=" AND p.id_proyecto=?";
             $dinParams[] = self::getBindParam("i",$id);
@@ -534,7 +586,8 @@ class Proyecto extends Model{
             $bindResult['monto'],$bindResult['overhead'],$bindResult['software'],
             $bindResult['patente'],$bindResult['otro_producto'],
             $bindResult['investigador'],$bindResult['investigador_nombre'],$bindResult['investigador_apellido'],
-            $bindResult['estatus'],$bindResult['creador'],$bindResult['fecha_creacion']);
+            $bindResult['estatus'],$bindResult['creador'],$bindResult['fecha_creacion'],
+            $bindResult['numero_aprobacion_etica'],$bindResult['es_confidencial']);
 
         $results = [];
         while($result->fetch()){
@@ -603,6 +656,9 @@ class Proyecto extends Model{
             $institutions = is_array($institutions) ? $institutions : [];
             $pro->setInstituciones($institutions);
 
+            $pro->setConfidencial($bindResult['es_confidencial']);
+            $pro->setNumeroAprobacionEtica($bindResult['numero_aprobacion_etica']);
+
             $results[] = $pro;
         }
         return $results;
@@ -657,6 +713,10 @@ class Proyecto extends Model{
 
         $result['patent'] = $this->getPatente();
 
+        $result['ethical_approved_number'] = $this->getNumeroAprobacionEtica();
+
+        $result['is_confidential'] = $this->isConfidencial();
+
         $result['co_researchers'] = [];
         foreach($this->getCoInvestigadores() as $coresearcher)
             $result['co_researchers'][] = $coresearcher->toArray();
@@ -697,7 +757,7 @@ class Proyecto extends Model{
 
         DatabaseManager::$link->autocommit(FALSE);
 
-        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
+        $query = "INSERT INTO proyecto(descripcion, fecha_aplicacion, fecha_inicio, asesor, id_estado_actual, id_estado_aplicacion, contrapartida_unibe, aporte_unibe, moneda, monto_total, overhead_unibe, software, patente, otro_producto, investigador_id, es_confidencial, numero_aprobacion_etica, estatus, creador, fecha_creacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())";
         $query = self::formatQuery($query);
 
         $dinParams[] = self::getBindParam("s",$this->descripcion);
@@ -715,6 +775,8 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->patente ? 1: 0);
         $dinParams[] = self::getBindParam("s",$this->otroProducto ? $this->otroProducto : "");
         $dinParams[] = self::getBindParam("i",$this->investigador ? $this->investigador->getId() : "");
+        $dinParams[] = self::getBindParam("i",$this->isConfidencial());
+        $dinParams[] = self::getBindParam("s",$this->getNumeroAprobacionEtica());
         $dinParams[] = self::getBindParam("i",$this->estatus->getId());
         $dinParams[] = self::getBindParam("i",$this->creador->id);
 
@@ -757,7 +819,7 @@ class Proyecto extends Model{
 
         $query = "UPDATE proyecto SET descripcion=?,fecha_aplicacion=?,fecha_inicio=?,asesor=?," .
                  "id_estado_actual=?,id_estado_aplicacion=?,contrapartida_unibe=?,aporte_unibe=?," .
-                 "moneda=?,monto_total=?,overhead_unibe=?,software=?,patente=?,otro_producto=?,investigador_id=? WHERE id_proyecto=?";
+                 "moneda=?,monto_total=?,overhead_unibe=?,software=?,patente=?,otro_producto=?,investigador_id=?,es_confidencial=?,numero_aprobacion_etica=? WHERE id_proyecto=?";
         $dinParams[] = self::getBindParam("s",$this->descripcion);
         $dinParams[] = self::getBindParam("s",$this->fechaAplicacion);
         $dinParams[] = self::getBindParam("s",$this->fechaInicio);
@@ -773,6 +835,8 @@ class Proyecto extends Model{
         $dinParams[] = self::getBindParam("i",$this->getPatente() ? "1" : "0");
         $dinParams[] = self::getBindParam("s",$this->getOtroProducto() ? $this->getOtroProducto() : "n/a");
         $dinParams[] = self::getBindParam("i",$this->getInvestigador() ?  $this->getInvestigador()->getId() : null);
+        $dinParams[] = self::getBindParam("i",$this->isConfidencial());
+        $dinParams[] = self::getBindParam("s",$this->getNumeroAprobacionEtica());
         $dinParams[] = self::getBindParam("i",$this->getId());
 
         $query = self::formatQuery($query);
