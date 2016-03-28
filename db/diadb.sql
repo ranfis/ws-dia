@@ -580,10 +580,23 @@ ALTER TABLE  `usuario_aplicacion` CHANGE  `FECHA_CREACION`  `FECHA_CREACION` TIM
 UPDATE  `role` SET  `NOMBRE` =  'SUPER-ADMIN' WHERE  `role`.`ID` =1;
 UPDATE  `diadb`.`role` SET  `NOMBRE` =  'ADMIN' WHERE  `role`.`ID` =2;
 INSERT INTO `diadb`.`role` (`ID`, `NOMBRE`) VALUES (NULL, 'REPORT');
-UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '1' WHERE  EMAIL="diaprincipal1@unibe.edu.do";
-UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  EMAIL="diaprincipal2@unibe.edu.do";
-UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  EMAIL="diaprincipal3@unibe.edu.do";
-UPDATE  `usuario_aplicacion` SET  `ROLE_ID` =  '3' WHERE  EMAIL="diaprincipal4@unibe.edu.do";
+UPDATE  `diadb`.`usuario_aplicacion` SET  `ROLE_ID` =  '1' WHERE  CORREO="diaprincipal1@unibe.edu.do";
+UPDATE  `diadb`.`usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  CORREO="diaprincipal2@unibe.edu.do";
+UPDATE  `diadb`.`usuario_aplicacion` SET  `ROLE_ID` =  '2' WHERE  CORREO="diaprincipal3@unibe.edu.do";
+UPDATE  `diadb`.`usuario_aplicacion` SET  `ROLE_ID` =  '3' WHERE  CORREO="diaprincipal4@unibe.edu.do";
+
+
+ALTER TABLE  `proyecto` ADD  `numero_aprobacion_etica` VARCHAR( 30 ) NULL COMMENT 'úmero de aprobación del Comité de Ética del proyecto' AFTER  `investigador_id` ,
+ADD INDEX (  `numero_aprobacion_etica` ) ;
+
+ALTER TABLE  `proyecto` ADD  `es_confidencial` BOOLEAN NOT NULL DEFAULT TRUE COMMENT  'determina si el proyecto es confidencial' AFTER  `investigador_id` ,
+ADD INDEX (  `es_confidencial` ) ;
+
+ALTER TABLE  `proyecto` CHANGE  `es_confidencial`  `es_confidencial` TINYINT( 1 ) NOT NULL DEFAULT  '0' COMMENT 'determina si el proyecto es confidencial';
+
+INSERT INTO `diadb`.`role` (`ID`, `NOMBRE`) VALUES (NULL, 'ADMIN CONFIDENTIAL'), (NULL, 'REPORT CONFIDENTIAL');
+
+
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

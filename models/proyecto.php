@@ -519,7 +519,7 @@ class Proyecto extends Model{
 
         if ($isConfidencial !== null){
             $query .=" AND p.es_confidencial=?";
-            $dinParams[] = self::getBindParam("i",$$isConfidencial ? 1 : 0);
+            $dinParams[] = self::getBindParam("i",$isConfidencial ? 1 : 0);
         }
 
         if ($id) {
@@ -945,7 +945,6 @@ class Proyecto extends Model{
 
         }
         return true;
-
     }
 
     /**
