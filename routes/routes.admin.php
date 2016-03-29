@@ -837,9 +837,7 @@ $app->get(\Config\Routes::CURRENCY_GET, function() use($app,$param){
 
 function validateProject(&$ws,&$app,&$param,$update = false){
 
-    $userSession = \Core\SessionManager::getUser();
-    $userSession = \Model\User::findById($userSession->id);
-
+    $userSession = \Core\SessionManager::getSession()->user;
 
     $id                 = isset($param['id']) ? $param['id'] : null;
     $descripcion        = isset($param['description']) ? $param['description'] : null;
