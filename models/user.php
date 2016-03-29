@@ -179,6 +179,16 @@ class User extends Model{
 		}
 		return $user;
 	}
+
+
+    /**
+     * Method to determine if this user can see confidential project
+    */
+    public function canSeeConfidentialProject(){
+        //else if ($userSession->getRole()->getId() == \Model\Role::ROLE_ADMIN && $esConfidencial) $ws->generate_error(01,"No puede agregar proyectos como confidencia. Acceso Denegado");
+        $roles= [Role::ROLE_SUPERADMIN,Role::ROLE_ADMIN_CONFIDENTIAL,Role::ROLE_REPORT_CONFIDENTIAL];
+        return in_array($this->getRole()->getId(),$roles);
+    }
 	
 	
 	/**
