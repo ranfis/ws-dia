@@ -8,6 +8,7 @@ require_once("models/fondo.php");
 require_once("models/institucionProyecto.php");
 require_once("models/unidadEjecutoraProyecto.php");
 
+use Core\SessionManager;
 use DatabaseManager;
 
 class Proyecto extends Model{
@@ -516,6 +517,11 @@ class Proyecto extends Model{
         $query.= " WHERE p.estatus != ?";
         $dinParams[] = self::getBindParam("i",Estatus::ESTATUS_REMOVED);
 
+        if ($isConfidencial === null){
+            $userSession = SessionManager::getSession()->user;
+            $showConfidential = $userSession->canSeeConfidentialProject() ? null : false;
+            $isConfidencial = $showConfidential;
+        }
 
         if ($isConfidencial !== null){
             $query .=" AND p.es_confidencial=?";

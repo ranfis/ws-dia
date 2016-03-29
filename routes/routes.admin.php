@@ -1088,11 +1088,7 @@ $app->get(\Config\Routes::PROJECT_LIST,function() use ($app,$param){
     $param = $_GET ? $_GET : null;
     if (!$ws->prepareRequest(\Core\Webservice::METHOD_GET,$param,$app)) return null;
 
-
-    $userSession = \Core\SessionManager::getSession()->user;
-
-    $showConfidential = $userSession->canSeeConfidentialProject() ? null : false;
-    $results = \Model\Proyecto::find(null,null,null,null,null,null,null,$showConfidential);
+    $results = \Model\Proyecto::find();
 
     $projects = [];
     foreach($results as $pro)
