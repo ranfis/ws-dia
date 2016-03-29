@@ -287,7 +287,7 @@ $app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
         "Asesor","Estado Actual","Estado Aplicacion","Investigador",
         "Contrapartida","Aporte","Moneda",
         "Monto Total","Overhead","Software","Patente",
-        "Co-Investigadores","Fondos","Unidades Ejecutoras","Instituciones"];
+        "Co-Investigadores","Fondos","Unidades Ejecutoras","Instituciones","Aprobación Comite Etica"];
 
     $year = isset($param['year']) ? $param['year'] : null;
     $estatusAplication = isset($param['application_status']) ? $param['application_status'] : null;
@@ -315,6 +315,7 @@ $app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
         $row[] = $project->getOverhead();
         $row[] = $project->getSoftware() ? "SI" : "NO";
         $row[] = $project->getPatente() ? "SI" : "NO";
+        $row[] = $project->getNumeroAprobacionEtica();
 
         $coresearchers = "";
         foreach($project->getCoInvestigadores() as $coresearch){
