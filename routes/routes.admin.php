@@ -1091,7 +1091,7 @@ $app->get(\Config\Routes::PROJECT_LIST,function() use ($app,$param){
 
     $userSession = \Core\SessionManager::getSession()->user;
 
-    $showConfidential = $userSession->canSeeConfidentialProject();
+    $showConfidential = $userSession->canSeeConfidentialProject() ? null : false;
     $results = \Model\Proyecto::find(null,null,null,null,null,null,null,$showConfidential);
 
     $projects = [];
