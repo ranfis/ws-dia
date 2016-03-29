@@ -11,7 +11,7 @@ class Role extends Model{
     const ROLE_ADMIN        = 2;
     const ROLE_REPORT       = 3;
     const ROLE_ADMIN_CONFIDENTIAL       = 4;
-    const ROLE_REPORT_CONFIDENTIAL      = 3;
+    const ROLE_REPORT_CONFIDENTIAL      = 5;
 
     private $id;
     private $name;
