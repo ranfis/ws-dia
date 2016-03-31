@@ -41,7 +41,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_EARNINGS,function($sessionId) use($app,
         $row[] = $project->getDescripcion();
         $row[] = substr($project->getFechaAplicacion(),0,4);
         $row[] = substr($project->getFechaInicio(),0,4);
-        $row[] = $project->getInvestigador()->getNombre();
+        $row[] = $project->getInvestigador()->getNombre() . " " . $project->getInvestigador()->getApellido();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getMontoTotal();
         $total = $total + $project->getMontoTotal();
@@ -86,7 +86,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_OVERHEAD,function($sessionId) use($app,
         $row[] = $project->getDescripcion();
         $row[] = substr($project->getFechaAplicacion(),0,4);
         $row[] = substr($project->getFechaInicio(),0,4);
-        $row[] = $project->getInvestigador()->getNombre();
+        $row[] = $project->getInvestigador()->getNombre() . " " . $project->getInvestigador()->getApellido();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getOverhead();
         $total = $total + $project->getOverhead();
@@ -132,7 +132,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_TOTALAMOUNT,function($sessionId) use($a
         $row[] = $project->getDescripcion();
         $row[] = substr($project->getFechaAplicacion(),0,4);
         $row[] = substr($project->getFechaInicio(),0,4);
-        $row[] = $project->getInvestigador()->getNombre();
+        $row[] = $project->getInvestigador()->getNombre() . " " . $project->getInvestigador()->getApellido();
         $row[] = $project->getMoneda()->getSimbolo();
         $row[] = $project->getMontoTotal();
         $row[] = $project->getOverhead();
@@ -300,22 +300,20 @@ $app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
     foreach($projects as $project){
         $row = [];
         $row[] = $project->getId();
-        $row[] = $project->getDescripcion();
-
+        $row[] = $project->getDescripcion() ? $project->getDescripcion() : "";
         $row[] = substr($project->getFechaAplicacion(),0,4);
         $row[] = substr($project->getFechaInicio(),0,4);
-        $row[] = $project->getAsesor() ? $project->getAsesor()->getNombre() : null;
+        $row[] = $project->getAsesor() ? $project->getAsesor()->getNombre() : "";
         $row[] = $project->getEstatusActual()->getDescripcion();
         $row[] = $project->getEstatusAplicacion()->getDescripcion();
-        $row[] = $project->getInvestigador()->getNombre();
-        $row[] = $project->getContraPartida();
-        $row[] = $project->getAporte();
-        $row[] = $project->getMoneda()->getSimbolo();
-        $row[] = $project->getMontoTotal();
-        $row[] = $project->getOverhead();
+        $row[] = $project->getInvestigador()->getNombre() . " " . $project->getInvestigador()->getApellido();
+        $row[] = $project->getContraPartida() ? $project->getContraPartida() : "";
+        $row[] = $project->getAporte() ? $project->getAporte() : "";
+        $row[] = $project->getMoneda()->getSimbolo() ? $project->getMoneda()->getSimbolo() : "";
+        $row[] = $project->getMontoTotal() ? $project->getMontoTotal() : "";
+        $row[] = $project->getOverhead() ? $project->getOverhead() : "";
         $row[] = $project->getSoftware() ? "SI" : "NO";
         $row[] = $project->getPatente() ? "SI" : "NO";
-        $row[] = $project->getNumeroAprobacionEtica();
 
         $coresearchers = "";
         foreach($project->getCoInvestigadores() as $coresearch){
@@ -345,6 +343,7 @@ $app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
             $institutions.= "\n";
         }
         $row[] = $institutions;
+        $row[] = $project->getNumeroAprobacionEtica() ? $project->getNumeroAprobacionEtica() : "" ;
 
         $rows[] = $row;
     }
@@ -399,7 +398,7 @@ $app->get(\Config\Routes::REPORT_ANNUAL,function($sessionId) use($app,$param){
         $row = [];
         $row[] = $project->getId();
         $row[] = $project->getDescripcion();
-        $row[] = $project->getInvestigador()->getNombre();
+        $row[] = $project->getInvestigador()->getNombre() . " " . $project->getInvestigador()->getApellido();
         $row[] = $project->getEstatusActual()->getDescripcion();
         $row[] = $project->getEstatusAplicacion()->getDescripcion();
         $row[] = $project->getMoneda()->getSimbolo();
