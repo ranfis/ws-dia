@@ -25,7 +25,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_EARNINGS,function($sessionId) use($app,
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Investigador","Moneda","Monto Total"];
+    $headers = ["ID","Descripcion","Fecha Inicio","Fecha Final","Investigador","Moneda","Monto Total"];
 
     $year = isset($param['year']) ? $param['year'] : null;
 
@@ -70,7 +70,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_OVERHEAD,function($sessionId) use($app,
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Investigador","Moneda","Overhead"];
+    $headers = ["ID","Descripcion","Fecha Inicio","Fecha Final","Investigador","Moneda","Overhead"];
 
     $year = isset($param['year']) ? $param['year'] : null;
 
@@ -115,7 +115,7 @@ $app->get(\Config\Routes::REPORT_PROJECT_TOTALAMOUNT,function($sessionId) use($a
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final","Investigador","Moneda","Monto Total","Overhead"];
+    $headers = ["ID","Descripcion","Fecha Inicio","Fecha Final","Investigador","Moneda","Monto Total","Overhead"];
 
     $year = isset($param['year']) ? $param['year'] : null;
 
@@ -283,7 +283,7 @@ $app->get(\Config\Routes::REPORT_PROJECT,function($sessionId) use($app,$param){
     $param['session_id'] = $sessionId;
     if (!validateSessionFile($param)) return true;
 
-    $headers = ["ID","Descripcion","Fecha Aplicacion","Fecha Final",
+    $headers = ["ID","Descripcion","Fecha Inicio","Fecha Final",
         "Asesor","Estado Actual","Estado Aplicacion","Investigador",
         "Contrapartida","Aporte","Moneda",
         "Monto Total","Overhead","Software","Patente",

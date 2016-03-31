@@ -597,6 +597,9 @@ ALTER TABLE  `proyecto` CHANGE  `es_confidencial`  `es_confidencial` TINYINT( 1 
 INSERT INTO `diadb`.`role` (`ID`, `NOMBRE`) VALUES (NULL, 'ADMIN-CF'), (NULL, 'REPORT-CF');
 
 INSERT INTO `diadb`.`usuario_aplicacion` (`ID`, `CORREO`, `CLAVE`, `NOMBRE_COMPLETO`, `ROLE_ID`, `VER_CODIGO`, `ESTATUS`, `FECHA_LOGIN`, `FECHA_CREACION`) VALUES (NULL, 'diaprincipal5@unibe.edu.do', '$2y$10$8HQJKAPijj/xcb4wAfNQCuCDD7YnGfIr0i0bBeUKCXO0.r5rcqp7y', 'Dia Principal 5', '4', '', '1', NULL, CURRENT_TIMESTAMP), (NULL, 'diaprincipal6@unibe.edu.do', '$2y$10$1Pb3.pukiwviE23UpitmQeW7dplvtojh4A6OtSe7ftja/ePuAcGSW', 'Dia Principal 6', '5', '', '1', NULL, CURRENT_TIMESTAMP);
+
+UPDATE  `diadb`.`moneda` SET  `simbolo` =  'EUR$' WHERE  `moneda`.`id` =3;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
