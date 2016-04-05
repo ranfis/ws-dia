@@ -12,7 +12,7 @@ class Routes{
 
     const ADM_USER_ADD          = "/user/add";
     const ADM_USER_UPDATE       = "/user/update";
-    const ADM_USER_DEL          = "/user/delete";
+    const ADM_USER_DEL          = "/user/del";
     const ADM_USER_LIST         = "/user/list";
     const ADM_USER_CHANGE_PASSWORD = "/user/change_password";
 
